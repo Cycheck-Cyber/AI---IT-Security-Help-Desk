@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Security Help Desk — Alert Enrichment, Advisory &amp; Tabletop Readiness</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:        #08080d;
+    --surface:    #0f0f17;
+    --panel:      #14141e;
+    --border:     rgba(255,255,255,0.07);
+    --gold:       #c9933a;
+    --gold-light: #e8b96a;
+    --gold-dim:   rgba(201,147,58,0.15);
+    --text:       #e8e6df;
+    --muted:      rgba(232,230,223,0.45);
+
+    /* service focus colours */
+    --triage:   #38bdf8;  /* sky blue — clarity */
+    --brief:    #34d399;  /* teal — translation */
+    --tabletop: #a78bfa;  /* purple — rehearsal */
+    --ondemand: #fbbf24;  /* amber — always-on */
+
+    /* severity */
+    --crit:     #ef4444;
+    --high:     #f59e0b;
+    --med:      #eab308;
+    --low:      #22c55e;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.6;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+  }
+
+  section { position: relative; z-index: 1; }
+
+  /* —— HERO —— */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px clamp(24px, 8vw, 160px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero__glow {
+    position: absolute;
+    width: 700px; height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(167,139,250,0.06) 0%, transparent 70%);
+    top: -200px; right: -200px;
+    pointer-events: none;
+  }
+
+  .hero__glow-2 {
+    position: absolute;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,147,58,0.05) 0%, transparent 70%);
+    bottom: 80px; left: 5%;
+    pointer-events: none;
+  }
+
+  .hero__live {
+    position: absolute;
+    top: 48px;
+    right: clamp(24px, 8vw, 160px);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--tabletop);
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 0.6s 1.2s forwards;
+  }
+
+  @keyframes pulseDot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .hero__live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--tabletop);
+    box-shadow: 0 0 6px var(--tabletop);
+    animation: pulseDot 2s ease-in-out infinite;
+  }
+
+  .hero__eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.1s forwards;
+  }
+
+  .hero__eyebrow::before {
+    content: '';
+    display: block;
+    width: 32px; height: 1px;
+    background: var(--gold);
+  }
+
+  .hero__title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(48px, 8.5vw, 132px);
+    font-weight: 300;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.25s forwards;
+  }
+
+  .hero__title em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+
+  .hero__positioning {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(13px, 1.6vw, 17px);
+    color: var(--gold-light);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-top: 24px;
+    margin-bottom: 8px;
+    padding-left: 44px;
+    position: relative;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.3s forwards;
+    line-height: 1.5;
+  }
+
+  .hero__positioning::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 50%;
+    width: 32px; height: 1px;
+    background: var(--gold-light);
+    opacity: 0.6;
+  }
+
+  .hero__domain {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(13px, 1.5vw, 18px);
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 48px;
+    margin-top: 18px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.35s forwards;
+  }
+
+  .hero__lead {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(18px, 2.2vw, 27px);
+    font-weight: 300;
+    line-height: 1.55;
+    max-width: 820px;
+    color: rgba(232,230,223,0.8);
+    margin-bottom: 60px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.45s forwards;
+  }
+
+  .hero__lead em { color: var(--gold-light); font-style: italic; }
+
+  .hero__stats {
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+  }
+
+  .stat { display: flex; flex-direction: column; gap: 4px; }
+
+  .stat__number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 48px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--gold-light);
+  }
+
+  .stat__label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .hero__divider {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.3;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 40px;
+    right: clamp(24px, 8vw, 160px);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    animation: fadeUp 0.8s 1s forwards;
+  }
+
+  .scroll-hint::after {
+    content: '';
+    display: block;
+    width: 1px; height: 40px;
+    background: linear-gradient(to bottom, var(--muted), transparent);
+    animation: scrollLine 2s ease-in-out infinite;
+  }
+
+  @keyframes scrollLine {
+    0%, 100% { opacity: 0.4; transform: scaleY(1); }
+    50%      { opacity: 1;   transform: scaleY(0.6); }
+  }
+
+  /* —— PROBLEM —— */
+  .problem {
+    padding: 100px clamp(24px, 8vw, 160px);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .problem__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2px;
+    margin-top: 56px;
+  }
+
+  @media (max-width: 900px) { .problem__grid { grid-template-columns: 1fr; gap: 1px; } }
+
+  .problem-item {
+    background: var(--ink);
+    padding: 36px 32px;
+    border-left: 2px solid transparent;
+    transition: border-color 0.3s, background 0.3s;
+  }
+
+  .problem-item:hover {
+    background: #0c0c16;
+    border-left-color: var(--gold);
+  }
+
+  .problem-item__icon {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px;
+    font-weight: 300;
+    color: var(--gold-light);
+    line-height: 1;
+    margin-bottom: 20px;
+    display: block;
+    font-style: italic;
+  }
+
+  .problem-item__title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  .problem-item__desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* —— OVERVIEW —— */
+  .overview {
+    padding: 120px clamp(24px, 8vw, 160px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 48px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    max-width: 80px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.4;
+  }
+
+  .overview__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  @media (max-width: 900px) { .overview__grid { grid-template-columns: 1fr; gap: 48px; } }
+
+  .overview__heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 4vw, 56px);
+    font-weight: 300;
+    line-height: 1.1;
+    margin-bottom: 24px;
+  }
+
+  .overview__text {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 20px;
+  }
+
+  .pillars {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin-top: 8px;
+  }
+
+  .pillar {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 20px;
+    align-items: start;
+    padding: 24px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .pillar:last-child { border-bottom: 1px solid var(--border); }
+
+  .pillar__num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    padding-top: 2px;
+  }
+
+  .pillar__title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .pillar__desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* —— HOW IT WORKS —— */
+  .how {
+    padding: 120px clamp(24px, 8vw, 160px);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .how__heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 4vw, 56px);
+    font-weight: 300;
+    margin-bottom: 64px;
+    max-width: 640px;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px;
+  }
+
+  @media (max-width: 1000px) { .steps { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 600px)  { .steps { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 400px)  { .steps { grid-template-columns: 1fr; } }
+
+  .step {
+    background: var(--panel);
+    padding: 32px 28px;
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .step:hover { background: #1a1a26; }
+
+  .step::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .step:hover::before { opacity: 1; }
+
+  .step:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    top: 50%; right: -12px;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: rgba(201,147,58,0.3);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  @media (max-width: 1000px) { .step::after { display: none; } }
+
+  .step__n {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 64px;
+    font-weight: 300;
+    line-height: 1;
+    margin-bottom: 16px;
+    color: rgba(201,147,58,0.2);
+  }
+
+  .step__title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .step__desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  /* —— SERVICE FOCUS —— */
+  .svc-header {
+    padding: 80px clamp(24px, 8vw, 160px) 60px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+
+  .svc-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(40px, 6vw, 88px);
+    font-weight: 300;
+    line-height: 0.95;
+  }
+
+  .svc-heading span {
+    display: block;
+    font-style: italic;
+    color: var(--gold-light);
+  }
+
+  .svc-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-align: right;
+    line-height: 2;
+  }
+
+  .svc-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    background: var(--surface);
+  }
+
+  @media (max-width: 1100px) { .svc-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px)  { .svc-grid { grid-template-columns: 1fr; } }
+
+  .svc-card {
+    background: var(--ink);
+    padding: 44px 32px 48px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.35s, transform 0.35s;
+  }
+
+  .svc-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--gold-dim) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.35s;
+    pointer-events: none;
+  }
+
+  .svc-card:hover { background: #0e0e18; transform: translateY(-2px); }
+  .svc-card:hover::after { opacity: 1; }
+
+  .svc-card__badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    padding: 4px 10px;
+    display: inline-block;
+    border: 1px solid;
+  }
+
+  .svc-card[data-fn="triage"]   .svc-card__badge { color: var(--triage);   border-color: rgba(56,189,248,0.4); }
+  .svc-card[data-fn="brief"]    .svc-card__badge { color: var(--brief);    border-color: rgba(52,211,153,0.4); }
+  .svc-card[data-fn="tabletop"] .svc-card__badge { color: var(--tabletop); border-color: rgba(167,139,250,0.4); }
+  .svc-card[data-fn="ondemand"] .svc-card__badge { color: var(--ondemand); border-color: rgba(251,191,36,0.4); }
+
+  .svc-card__name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(28px, 3vw, 36px);
+    font-weight: 300;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    letter-spacing: -0.01em;
+  }
+
+  .svc-card__desc {
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 28px;
+  }
+
+  .svc-card__points { display: flex; flex-direction: column; gap: 8px; }
+
+  .svc-point {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 12.5px;
+    color: rgba(232,230,223,0.6);
+    line-height: 1.4;
+  }
+
+  .svc-point::before {
+    content: '—';
+    font-family: 'Space Mono', monospace;
+    color: var(--gold);
+    flex-shrink: 0;
+    font-size: 11px;
+    margin-top: 1px;
+  }
+
+  .svc-card__bar {
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 2px; width: 0;
+    transition: width 0.5s ease;
+  }
+
+  .svc-card[data-fn="triage"]   .svc-card__bar { background: linear-gradient(90deg, var(--triage),   transparent); }
+  .svc-card[data-fn="brief"]    .svc-card__bar { background: linear-gradient(90deg, var(--brief),    transparent); }
+  .svc-card[data-fn="tabletop"] .svc-card__bar { background: linear-gradient(90deg, var(--tabletop), transparent); }
+  .svc-card[data-fn="ondemand"] .svc-card__bar { background: linear-gradient(90deg, var(--ondemand), transparent); }
+
+  .svc-card:hover .svc-card__bar { width: 100%; }
+
+  /* —— DOMAINS COVERED —— */
+  .domains {
+    padding: 100px clamp(24px, 8vw, 160px);
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .domains__head {
+    max-width: 780px;
+    margin-bottom: 56px;
+  }
+
+  .domains__heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(28px, 3.5vw, 48px);
+    font-weight: 300;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+
+  .domains__sub {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .domains__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+
+  @media (max-width: 900px) { .domains__grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 500px) { .domains__grid { grid-template-columns: 1fr; } }
+
+  .domain-cell {
+    background: var(--ink);
+    padding: 28px 24px;
+    transition: background 0.3s, transform 0.3s;
+    border-top: 1px solid transparent;
+  }
+
+  .domain-cell:hover {
+    background: #0e0e18;
+    border-top-color: var(--gold);
+    transform: translateY(-2px);
+  }
+
+  .domain-cell__name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--gold-light);
+    margin-bottom: 8px;
+    letter-spacing: 0.01em;
+  }
+
+  .domain-cell__desc {
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* —— VALUE / WHAT YOU GAIN —— */
+  .value {
+    padding: 120px clamp(24px, 8vw, 160px);
+  }
+
+  .value__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-top: 56px;
+  }
+
+  @media (max-width: 900px) { .value__grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 500px) { .value__grid { grid-template-columns: 1fr; } }
+
+  .value-card {
+    background: var(--panel);
+    padding: 36px 28px;
+    text-align: left;
+    border-top: 2px solid var(--gold);
+    transition: transform 0.3s, background 0.3s;
+  }
+
+  .value-card:hover { transform: translateY(-4px); background: #1a1a26; }
+
+  .value-card__name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 400;
+    margin-bottom: 14px;
+    color: var(--gold-light);
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+  }
+
+  .value-card__def {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* —— DELIVERABLE / MOCK —— */
+  .deliverable {
+    padding: 120px clamp(24px, 8vw, 160px);
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .deliverable__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  @media (max-width: 900px) { .deliverable__grid { grid-template-columns: 1fr; } }
+
+  .deliverable__heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(28px, 3.5vw, 48px);
+    font-weight: 300;
+    line-height: 1.15;
+    margin-bottom: 24px;
+  }
+
+  .deliverable__text {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 32px;
+  }
+
+  .deliver-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+
+  .deliver-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+
+  .deliver-list li::before {
+    content: '›';
+    color: var(--gold);
+    font-family: 'Space Mono', monospace;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .report-mock {
+    background: var(--ink);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    font-family: 'Space Mono', monospace;
+    font-size: 11.5px;
+  }
+
+  .report-mock__bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; }
+  .dot.y { background: #ffbd2e; }
+  .dot.g { background: #28c940; }
+
+  .report-mock__title {
+    margin-left: 12px;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .report-mock__body {
+    padding: 22px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .brief-card {
+    background: var(--panel);
+    border-left: 2px solid var(--gold);
+    padding: 14px 16px;
+  }
+
+  .brief-card.crit { border-left-color: var(--crit); }
+  .brief-card.high { border-left-color: var(--high); }
+  .brief-card.med  { border-left-color: var(--med); }
+
+  .brief-card__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .brief-sev {
+    font-size: 9px;
+    padding: 2px 8px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border-radius: 2px;
+    font-weight: 700;
+  }
+
+  .brief-sev.crit { background: rgba(239,68,68,0.15);  color: var(--crit); }
+  .brief-sev.high { background: rgba(245,158,11,0.15); color: var(--high); }
+  .brief-sev.med  { background: rgba(234,179,8,0.15);  color: var(--med); }
+
+  .brief-card__title {
+    font-family: 'Syne', sans-serif;
+    font-size: 12.5px;
+    color: var(--text);
+    font-weight: 400;
+    line-height: 1.3;
+  }
+
+  .brief-card__rows {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 10.5px;
+    color: var(--muted);
+    line-height: 1.5;
+    padding-top: 6px;
+    border-top: 1px dashed var(--border);
+  }
+
+  .brief-row {
+    display: grid;
+    grid-template-columns: 84px 1fr;
+    gap: 10px;
+  }
+
+  .brief-row__k {
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 9px;
+    padding-top: 2px;
+  }
+
+  .brief-row__v { color: rgba(232,230,223,0.75); }
+
+  .brief-tt-badge {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--tabletop);
+    border: 1px solid rgba(167,139,250,0.4);
+    padding: 2px 8px;
+    border-radius: 2px;
+  }
+
+  /* —— TRUST —— */
+  .trust {
+    padding: 120px clamp(24px, 8vw, 160px);
+  }
+
+  .trust__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 64px;
+  }
+
+  @media (max-width: 900px) { .trust__grid { grid-template-columns: 1fr; } }
+
+  .trust-block {
+    background: var(--surface);
+    padding: 40px 32px;
+    border-top: 2px solid var(--gold);
+    transition: background 0.3s;
+  }
+
+  .trust-block:hover { background: var(--panel); }
+
+  .trust-block__label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .trust-block__title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-weight: 400;
+    margin-bottom: 14px;
+    line-height: 1.15;
+  }
+
+  .trust-block__desc {
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* —— CTA —— */
+  .cta {
+    padding: 140px clamp(24px, 8vw, 160px);
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta__glow {
+    position: absolute;
+    width: 900px; height: 500px;
+    background: radial-gradient(ellipse, rgba(167,139,250,0.08) 0%, transparent 60%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .cta__heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(40px, 6vw, 88px);
+    font-weight: 300;
+    line-height: 1;
+    margin-bottom: 32px;
+    position: relative;
+  }
+
+  .cta__heading em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+
+  .cta__sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(18px, 2vw, 24px);
+    font-weight: 300;
+    max-width: 720px;
+    margin: 0 auto 48px;
+    color: rgba(232,230,223,0.75);
+    line-height: 1.5;
+    position: relative;
+  }
+
+  .cta__url {
+    font-family: 'Space Mono', monospace;
+    font-size: 16px;
+    letter-spacing: 0.15em;
+    color: var(--gold-light);
+    text-decoration: none;
+    padding: 18px 40px;
+    border: 1px solid var(--gold);
+    display: inline-block;
+    transition: all 0.3s;
+    position: relative;
+    text-transform: uppercase;
+  }
+
+  .cta__url:hover {
+    background: var(--gold);
+    color: var(--ink);
+    letter-spacing: 0.22em;
+  }
+
+  /* —— FOOTER —— */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 32px clamp(24px, 8vw, 160px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .footer__brand {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .footer__copy {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: rgba(232,230,223,0.2);
+  }
+
+  /* —— ANIMATIONS —— */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @media print {
+    body::before, body::after { display: none; }
+    .svc-card:hover, .step:hover, .value-card:hover, .domain-cell:hover { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ———————— HERO ———————— -->
+<section class="hero">
+  <div class="hero__glow"></div>
+  <div class="hero__glow-2"></div>
+
+  <div class="hero__live">
+    <div class="hero__live-dot"></div>
+    Human-Led&nbsp;·&nbsp;European&nbsp;·&nbsp;Always-On
+  </div>
+
+  <p class="hero__eyebrow">For IT Leaders · Teams Without a Dedicated SOC · Organisations With Security Skill Gaps</p>
+
+  <h1 class="hero__title">
+    IT Security<br>
+    <em>Help Desk.</em>
+  </h1>
+
+  <p class="hero__positioning">Alert Enrichment · Advisory Intelligence · Tabletop Readiness · Expert On Demand</p>
+
+  <p class="hero__domain">intel.cycheck.de</p>
+
+  <p class="hero__lead">
+    The security support line your organisation has been missing. Every incoming alert arrives already investigated, every advisory already translated, every likely incident already rehearsed — delivered by a real team of analysts your people can actually <em>call</em>.
+  </p>
+
+  <div class="hero__stats">
+    <div class="stat">
+      <span class="stat__number">1</span>
+      <span class="stat__label">Central Desk · All Domains</span>
+    </div>
+    <div class="stat">
+      <span class="stat__number">Human</span>
+      <span class="stat__label">Analyst-Led</span>
+    </div>
+    <div class="stat">
+      <span class="stat__number">Ready</span>
+      <span class="stat__label">Before the Incident</span>
+    </div>
+    <div class="stat">
+      <span class="stat__number">EU</span>
+      <span class="stat__label">By Design</span>
+    </div>
+  </div>
+
+  <div class="hero__divider"></div>
+  <div class="scroll-hint">Scroll</div>
+</section>
+
+<!-- ———————— PROBLEM ———————— -->
+<section class="problem">
+  <div class="section-label">Why This Matters</div>
+  <div class="problem__grid reveal">
+    <div class="problem-item">
+      <span class="problem-item__icon">I</span>
+      <div class="problem-item__title">Raw Alerts Arrive Faster Than You Can Investigate</div>
+      <div class="problem-item__desc">SIEM alerts, vendor bulletins, CVE feeds, regulatory warnings — they all land in the same overwhelmed inbox, written by specialists for specialists. Each raw alert arrives without context, without priority, without a recommended action. The things that actually matter for your environment slip through.</div>
+    </div>
+    <div class="problem-item">
+      <span class="problem-item__icon">II</span>
+      <div class="problem-item__title">The Expertise You'd Need, You Can't Hire</div>
+      <div class="problem-item__desc">A full security operations team is out of reach for most mid-sized organisations. Specialists are scarce, expensive, and rarely stay. So the work falls on an IT team already at capacity — one that is brilliant at what it does, but was never meant to be a SOC on top of everything else.</div>
+    </div>
+    <div class="problem-item">
+      <span class="problem-item__icon">III</span>
+      <div class="problem-item__title">The First Walk-Through Shouldn't Be During the Incident</div>
+      <div class="problem-item__desc">When an incident actually hits, the questions get asked in a rush: Who decides? Who calls legal? What do we tell customers? Teams that rehearse these questions calmly, in advance, handle the real thing ten times better. Teams that don't, learn the hard way — in public.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ———————— OVERVIEW ———————— -->
+<section class="overview">
+  <div class="section-label">What We Do For You</div>
+  <div class="overview__grid reveal">
+    <div>
+      <h2 class="overview__heading">The security support line your organisation has been missing</h2>
+      <p class="overview__text">
+        Incoming SIEM alerts arrive already investigated — mapped to known attacker techniques, classified by severity, and paired with recommended remediation steps. Your ticketing system receives enriched, actionable events instead of raw log lines. Your team opens tickets that are ready to act on.
+      </p>
+      <p class="overview__text">
+        Between alerts, we're the desk you <em>call</em>. For advisory questions, for regulatory updates, for the quarterly tabletop that rehearses your response <em>before</em> the incident hits. One central number, one consistent team, one relationship — covering every security domain your organisation actually faces.
+      </p>
+    </div>
+    <div class="pillars">
+      <div class="pillar">
+        <span class="pillar__num">01</span>
+        <div>
+          <div class="pillar__title">One Central Desk</div>
+          <div class="pillar__desc">Endpoint, network, cloud, identity, email, supply chain, AI — all covered by one consistent advisory desk. No gaps between domains. No separate vendors to coordinate. One call, one voice.</div>
+        </div>
+      </div>
+      <div class="pillar">
+        <span class="pillar__num">02</span>
+        <div>
+          <div class="pillar__title">Translated For You, Not At You</div>
+          <div class="pillar__desc">Every advisory we send is written for your environment, your size, your reality — not copy-pasted from the vendor bulletin. What it means, what to do, what to skip. Five-minute briefings, not fifty-page reports.</div>
+        </div>
+      </div>
+      <div class="pillar">
+        <span class="pillar__num">03</span>
+        <div>
+          <div class="pillar__title">Rehearsal Before the Heat</div>
+          <div class="pillar__desc">We run tabletop sessions on the scenarios that actually threaten you. Your leadership team walks the decisions in a calm room, so when the decisions matter for real, the playbook is already familiar.</div>
+        </div>
+      </div>
+      <div class="pillar">
+        <span class="pillar__num">04</span>
+        <div>
+          <div class="pillar__title">On-Demand Expertise</div>
+          <div class="pillar__desc">Between briefings, you have a security desk on speed-dial. Ask a question, get a human answer — not an automated FAQ, not a ticketing system. A senior analyst, same day, in your language.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ———————— HOW IT WORKS ———————— -->
+<section class="how">
+  <div class="section-label">How It Works</div>
+  <h2 class="how__heading reveal">From raw alert<br>to rehearsed response<br>— in five steps</h2>
+  <div class="steps reveal">
+    <div class="step">
+      <div class="step__n">01</div>
+      <div class="step__title">Alert Arrives</div>
+      <div class="step__desc">Incoming alerts from your SIEM, endpoint, identity, or cloud tools reach our desk automatically — or you send a question directly through your ticketing system. Any source, any format.</div>
+    </div>
+    <div class="step">
+      <div class="step__n">02</div>
+      <div class="step__title">Mapped &amp; Classified</div>
+      <div class="step__desc">Each alert is mapped to known attacker techniques and classified by severity — so a raw log line becomes a structured event with context: what happened, how serious it is, and what attack stage it represents.</div>
+    </div>
+    <div class="step">
+      <div class="step__n">03</div>
+      <div class="step__title">Translated to Action</div>
+      <div class="step__desc">We turn the enriched alert into plain-language guidance — what to do now, what to check next, what can safely wait. Your ticket opens already carrying the answer.</div>
+    </div>
+    <div class="step">
+      <div class="step__n">04</div>
+      <div class="step__title">Rehearsed &amp; Briefed</div>
+      <div class="step__desc">Between incidents, we brief your leadership on what's new in the threat landscape — and quarterly, we run tabletop scenarios that walk your team through the likely incidents <em>before</em> they happen.</div>
+    </div>
+    <div class="step">
+      <div class="step__n">05</div>
+      <div class="step__title">You Call, We Answer</div>
+      <div class="step__desc">Whenever a question arises, the desk is one call away. A senior analyst, same day, in your language — not an FAQ, not a ticketing queue. Human answers, always.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ———————— SERVICE FOCUS ———————— -->
+<div class="svc-header reveal" style="position:relative;z-index:1;">
+  <h2 class="svc-heading">
+    Four Services,<br>
+    <span>One Desk</span>
+  </h2>
+  <div class="svc-meta">
+    Enrichment &nbsp;·&nbsp; Advisory &nbsp;·&nbsp; Tabletop &nbsp;·&nbsp; On Demand<br>
+    Scoped to your team's size and rhythm
+  </div>
+</div>
+
+<div class="svc-grid" style="position:relative;z-index:1;">
+
+  <div class="svc-card" data-fn="triage">
+    <div class="svc-card__badge">Service 01</div>
+    <div class="svc-card__name">Alert Enrichment</div>
+    <div class="svc-card__desc">Incoming SIEM, endpoint, identity, and cloud alerts arrive at our desk automatically. We map each one to known attacker techniques, classify by severity, and write clear remediation steps — so your ticket opens ready to act on, not ready to investigate.</div>
+    <div class="svc-card__points">
+      <div class="svc-point">Connects to your existing SIEM or ticketing</div>
+      <div class="svc-point">Mapped to known attacker techniques</div>
+      <div class="svc-point">Severity and priority clearly stated</div>
+      <div class="svc-point">Remediation steps written for your team</div>
+    </div>
+    <div class="svc-card__bar"></div>
+  </div>
+
+  <div class="svc-card" data-fn="brief">
+    <div class="svc-card__badge">Service 02</div>
+    <div class="svc-card__name">Advisory Intelligence</div>
+    <div class="svc-card__desc">Every week, a plain-language brief: what changed in the threat landscape, what applies to your environment, what to do about it. The five-minute read that replaces the fifty-page vendor report no one on your team had time for.</div>
+    <div class="svc-card__points">
+      <div class="svc-point">Filtered to what applies to you</div>
+      <div class="svc-point">Written for your team, not for specialists</div>
+      <div class="svc-point">Clear "what to do now" every time</div>
+      <div class="svc-point">Ready to share with leadership unchanged</div>
+    </div>
+    <div class="svc-card__bar"></div>
+  </div>
+
+  <div class="svc-card" data-fn="tabletop">
+    <div class="svc-card__badge">Service 03</div>
+    <div class="svc-card__name">Tabletop Readiness</div>
+    <div class="svc-card__desc">We sit down with your team and walk through the scenarios that could actually hit you. What happens first. Who decides. Who calls whom. The rehearsal that turns panic into procedure when it matters for real.</div>
+    <div class="svc-card__points">
+      <div class="svc-point">Facilitated walkthrough, not a lecture</div>
+      <div class="svc-point">Scenarios tuned to your real exposure</div>
+      <div class="svc-point">Gaps identified, playbooks refined</div>
+      <div class="svc-point">Leadership and IT in the same room</div>
+    </div>
+    <div class="svc-card__bar"></div>
+  </div>
+
+  <div class="svc-card" data-fn="ondemand">
+    <div class="svc-card__badge">Service 04</div>
+    <div class="svc-card__name">Expert On Demand</div>
+    <div class="svc-card__desc">Between alerts and briefings, a senior analyst is one call away. Ask a question, get a human answer — same day, in your language. Your security bench, without the headcount.</div>
+    <div class="svc-card__points">
+      <div class="svc-point">Direct access to senior analysts</div>
+      <div class="svc-point">Same-day turnaround on questions</div>
+      <div class="svc-point">Human answers — not an FAQ</div>
+      <div class="svc-point">Continuous context, not starting from zero</div>
+    </div>
+    <div class="svc-card__bar"></div>
+  </div>
+
+</div>
+
+<!-- ———————— DOMAINS COVERED ———————— -->
+<section class="domains">
+  <div class="section-label">Domains We Cover</div>
+  <div class="domains__head reveal">
+    <h2 class="domains__heading">One central desk — across every security area that matters to you</h2>
+    <p class="domains__sub">Your environment doesn't split cleanly into silos, so neither does our coverage. One consistent advisory desk, one voice, one relationship — spanning the areas where the real threats actually appear.</p>
+  </div>
+  <div class="domains__grid reveal">
+    <div class="domain-cell">
+      <div class="domain-cell__name">Endpoint &amp; Workstation</div>
+      <div class="domain-cell__desc">Ransomware, credential theft, suspicious executables — the threats that land directly on your users' machines.</div>
+    </div>
+    <div class="domain-cell">
+      <div class="domain-cell__name">Identity &amp; Access</div>
+      <div class="domain-cell__desc">Account compromise, phishing, impossible-travel logins — the front door most real attacks walk through.</div>
+    </div>
+    <div class="domain-cell">
+      <div class="domain-cell__name">Network &amp; Firewall</div>
+      <div class="domain-cell__desc">Lateral movement, command-and-control traffic, unusual outbound flows — the signals that show something is already inside.</div>
+    </div>
+    <div class="domain-cell">
+      <div class="domain-cell__name">Cloud &amp; SaaS</div>
+      <div class="domain-cell__desc">Misconfigured storage, over-permissioned identities, shadow SaaS — the modern perimeter you may not fully see.</div>
+    </div>
+    <div class="domain-cell">
+      <div class="domain-cell__name">Email &amp; Collaboration</div>
+      <div class="domain-cell__desc">Business email compromise, invoice fraud, targeted phishing — the attacks that still cost organisations the most.</div>
+    </div>
+    <div class="domain-cell">
+      <div class="domain-cell__name">Supply Chain &amp; Third Party</div>
+      <div class="domain-cell__desc">Vendor breaches, software supply-chain attacks, third-party exposure — the risk that enters through someone else's door.</div>
+    </div>
+    <div class="domain-cell">
+      <div class="domain-cell__name">AI &amp; Emerging Threats</div>
+      <div class="domain-cell__desc">Attacks targeting AI tools, agentic systems, and the new surfaces that traditional advisories don't yet cover well.</div>
+    </div>
+    <div class="domain-cell">
+      <div class="domain-cell__name">Regulatory &amp; Compliance</div>
+      <div class="domain-cell__desc">New rules, new obligations, new evidence requirements — translated into what you actually have to do, and by when.</div>
+    </div>
+    <div class="domain-cell">
+      <div class="domain-cell__name">Operational Resilience</div>
+      <div class="domain-cell__desc">Backup, recovery, business-continuity — the quiet capabilities that decide how bad a bad day actually gets.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ———————— VALUE / WHAT YOU GAIN ———————— -->
+<section class="value">
+  <div class="section-label">What You Gain</div>
+  <h2 class="reveal" style="font-family:'Cormorant Garamond',serif;font-size:clamp(28px,3.5vw,48px);font-weight:300;max-width:720px;line-height:1.1">Outcomes you can feel<br>in the calm days — and<br>especially in the hard ones</h2>
+  <div class="value__grid reveal">
+    <div class="value-card">
+      <div class="value-card__name">Signal, Not Noise</div>
+      <div class="value-card__def">Your inbox stays quiet. Your team stays focused. The advisories that actually matter reach you, clearly framed — the rest, filtered out before they waste anyone's morning.</div>
+    </div>
+    <div class="value-card">
+      <div class="value-card__name">Readiness Before Panic</div>
+      <div class="value-card__def">When an incident hits, your team isn't walking the decisions for the first time. The playbook is familiar, the roles are clear, and the calm rehearsal pays off exactly when calm is in short supply.</div>
+    </div>
+    <div class="value-card">
+      <div class="value-card__name">Expertise Without Hiring</div>
+      <div class="value-card__def">A senior analyst bench on demand, without the headcount, the recruiter fees, or the risk of losing your one specialist to the next offer. Your capacity scales without your org chart.</div>
+    </div>
+    <div class="value-card">
+      <div class="value-card__name">Leadership Confidence</div>
+      <div class="value-card__def">Clear answers when the board asks "are we prepared?" — backed by a rehearsed response, a current advisory digest, and a trusted partner your executives can meet and recognise.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ———————— DELIVERABLE / MOCK ———————— -->
+<section class="deliverable">
+  <div class="deliverable__grid reveal">
+    <div>
+      <div class="section-label">What You Receive</div>
+      <h2 class="deliverable__heading">Enriched tickets. Weekly briefings. Quarterly rehearsals. One number to call.</h2>
+      <p class="deliverable__text">
+        We work on a steady rhythm. Alerts are enriched the moment they arrive. Briefings land weekly. Tabletops run quarterly. An analyst is on call between. The outputs are plain-language, ready to share, and built to fit how your team actually works — not how a vendor thinks you should.
+      </p>
+      <ul class="deliver-list">
+        <li>Enriched security tickets — alerts arrive mapped, classified, and ready to act on</li>
+        <li>Weekly advisory digest — what's new, what matters to you, what to do</li>
+        <li>Per-advisory briefings — plain-language, action-first, five-minute read</li>
+        <li>Quarterly tabletop session — facilitated scenario walkthrough with your team</li>
+        <li>Refined response playbook — updated after every tabletop and real incident</li>
+        <li>On-demand analyst access — same-day human answers between briefings</li>
+        <li>Leadership readiness summary — board-ready status, at the rhythm you need it</li>
+      </ul>
+    </div>
+    <div class="report-mock">
+      <div class="report-mock__bar">
+        <div class="dot r"></div>
+        <div class="dot y"></div>
+        <div class="dot g"></div>
+        <div class="report-mock__title">Help Desk — Enriched Tickets &amp; Briefings</div>
+      </div>
+      <div class="report-mock__body">
+
+        <div class="brief-card crit">
+          <div class="brief-card__header">
+            <span class="brief-sev crit">Critical · Enriched</span>
+            <span class="brief-card__title">Credential-theft attempt detected on domain controller</span>
+          </div>
+          <div class="brief-card__rows">
+            <div class="brief-row"><span class="brief-row__k">Technique</span><span class="brief-row__v">OS Credential Dumping · Valid Accounts</span></div>
+            <div class="brief-row"><span class="brief-row__k">What to do</span><span class="brief-row__v">Isolate host now · rotate admin credentials · check 2 downstream systems</span></div>
+            <div class="brief-row"><span class="brief-row__k">Ticket</span><span class="brief-row__v">Opened in your system, already assigned priority</span></div>
+          </div>
+          <span class="brief-tt-badge">Tabletop Scenario · Prepared</span>
+        </div>
+
+        <div class="brief-card high">
+          <div class="brief-card__header">
+            <span class="brief-sev high">High · Enriched</span>
+            <span class="brief-card__title">Impossible-travel login — user signed in from two countries in four minutes</span>
+          </div>
+          <div class="brief-card__rows">
+            <div class="brief-row"><span class="brief-row__k">Technique</span><span class="brief-row__v">Valid Accounts · likely credential compromise</span></div>
+            <div class="brief-row"><span class="brief-row__k">What to do</span><span class="brief-row__v">Force password reset · enable step-up MFA · review recent actions</span></div>
+            <div class="brief-row"><span class="brief-row__k">Owner</span><span class="brief-row__v">IT &amp; Identity team — playbook link attached</span></div>
+          </div>
+        </div>
+
+        <div class="brief-card med">
+          <div class="brief-card__header">
+            <span class="brief-sev med">Medium · Advisory</span>
+            <span class="brief-card__title">New phishing pattern targeting finance &amp; procurement teams</span>
+          </div>
+          <div class="brief-card__rows">
+            <div class="brief-row"><span class="brief-row__k">Your exposure</span><span class="brief-row__v">Likely — matches your industry profile</span></div>
+            <div class="brief-row"><span class="brief-row__k">What to do</span><span class="brief-row__v">30-minute awareness briefing for the two named teams</span></div>
+            <div class="brief-row"><span class="brief-row__k">Deadline</span><span class="brief-row__v">This month · not urgent this week</span></div>
+          </div>
+        </div>
+
+        <div class="brief-card">
+          <div class="brief-card__header">
+            <span class="brief-sev med">Filtered Out</span>
+            <span class="brief-card__title">27 other alerts &amp; advisories this week — not relevant to your environment</span>
+          </div>
+          <div class="brief-card__rows">
+            <div class="brief-row"><span class="brief-row__k">Reason</span><span class="brief-row__v">Products you don't run, regions not yours, risks not applicable</span></div>
+            <div class="brief-row"><span class="brief-row__k">Audit trail</span><span class="brief-row__v">Full list available on request — nothing is hidden</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ———————— TRUST ———————— -->
+<section class="trust">
+  <div class="section-label">Why Us</div>
+  <h2 class="reveal" style="font-family:'Cormorant Garamond',serif;font-size:clamp(28px,3.5vw,52px);font-weight:300;line-height:1.1;max-width:720px;margin-bottom:0">A partner you can call by name — not a platform you log into</h2>
+  <div class="trust__grid reveal">
+    <div class="trust-block">
+      <div class="trust-block__label">Principle 01</div>
+      <div class="trust-block__title">Human-led, always</div>
+      <div class="trust-block__desc">Every advisory you receive has been read and framed by a senior analyst — not auto-generated and pushed through a queue. The technology is behind the scenes. The person writing your brief is on the other end of the phone.</div>
+    </div>
+    <div class="trust-block">
+      <div class="trust-block__label">Principle 02</div>
+      <div class="trust-block__title">European by design</div>
+      <div class="trust-block__desc">Built and operated within the European Union. Aligned with the rules your team already has to follow. Delivered in your language, in your timezone, by people whose context matches yours.</div>
+    </div>
+    <div class="trust-block">
+      <div class="trust-block__label">Principle 03</div>
+      <div class="trust-block__title">Rehearsal over assertion</div>
+      <div class="trust-block__desc">We measure ourselves not by how many advisories we send, but by how prepared your team feels when the hard day arrives. Readiness you can feel — not a dashboard that claims it on your behalf.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ———————— CTA ———————— -->
+<section class="cta">
+  <div class="cta__glow"></div>
+  <h2 class="cta__heading reveal">
+    One number<br>
+    to call.<br>
+    <em>Every security question.</em>
+  </h2>
+  <p class="cta__sub reveal">
+    Start a conversation. Tell us what's in your inbox today — the alerts you can't investigate, the advisories you can't decode, the incidents you hope never happen. We'll scope the desk together, in plain language, at your rhythm.
+  </p>
+  <a class="cta__url reveal" href="https://intel.cycheck.de" target="_blank">
+    intel.cycheck.de
+  </a>
+</section>
+
+<!-- ———————— FOOTER ———————— -->
+<footer class="footer">
+  <div class="footer__brand">IT Security Help Desk — Alert Enrichment · Advisory · Tabletop Readiness · On Demand</div>
+  <div class="footer__copy">Customer Brief · 2026</div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  const svcCards = document.querySelectorAll('.svc-card');
+  svcCards.forEach((card, i) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    card.style.transition = `opacity 0.6s ${i * 0.1}s ease, transform 0.6s ${i * 0.1}s ease, background 0.35s`;
+  });
+
+  const svcObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        svcCards.forEach(card => {
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        });
+        svcObserver.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  const svcGrid = document.querySelector('.svc-grid');
+  if (svcGrid) svcObserver.observe(svcGrid);
+</script>
+</body>
+</html>
