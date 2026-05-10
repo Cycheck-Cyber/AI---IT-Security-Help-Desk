@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SovraGuard — EU Data Sovereignty Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:        #08080d;
+    --surface:    #0f0f17;
+    --panel:      #14141e;
+    --border:     rgba(255,255,255,0.07);
+    --gold:       #c9933a;
+    --gold-light: #e8b96a;
+    --gold-dim:   rgba(201,147,58,0.15);
+    --text:       #e8e6df;
+    --muted:      rgba(232,230,223,0.45);
+    --accent:     #3a6fc9;
+    --danger:     #c93a3a;
+    --success:    #3ac97a;
+    --eu:         #3ac97a;
+    --us:         #c93a3a;
+    --warn:       #c9b83a;
+    --c3:         #aa66ff;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.6;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+  }
+
+  section { position: relative; z-index: 1; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  @keyframes scrollLine {
+    0%, 100% { opacity: 0.4; transform: scaleY(1); }
+    50%       { opacity: 1;   transform: scaleY(0.6); }
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px clamp(24px, 8vw, 160px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero__glow {
+    position: absolute;
+    width: 700px; height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(58,201,122,0.06) 0%, transparent 70%);
+    top: -200px; right: -200px;
+    pointer-events: none;
+  }
+
+  .hero__glow-2 {
+    position: absolute;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,147,58,0.05) 0%, transparent 70%);
+    bottom: 80px; left: 5%;
+    pointer-events: none;
+  }
+
+  .hero__live {
+    position: absolute;
+    top: 48px;
+    right: clamp(24px, 8vw, 160px);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--success);
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 0.6s 1.2s forwards;
+  }
+
+  .hero__live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 6px var(--success);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .hero__eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.1s forwards;
+  }
+
+  .hero__eyebrow::before {
+    content: '';
+    display: block;
+    width: 32px; height: 1px;
+    background: var(--gold);
+  }
+
+  .hero__title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(48px, 8.5vw, 128px);
+    font-weight: 300;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.25s forwards;
+  }
+
+  .hero__title em { font-style: italic; color: var(--gold-light); }
+
+  .hero__domain {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(13px, 1.5vw, 18px);
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.35s forwards;
+  }
+
+  .hero__lead {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(18px, 2.2vw, 27px);
+    font-weight: 300;
+    line-height: 1.55;
+    max-width: 760px;
+    color: rgba(232,230,223,0.8);
+    margin-bottom: 60px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.45s forwards;
+  }
+
+  .hero__stats {
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+  }
+
+  .stat { display: flex; flex-direction: column; gap: 4px; }
+
+  .stat__number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 48px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--gold-light);
+  }
+
+  .stat__label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .hero__divider {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.3;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 40px;
+    right: clamp(24px, 8vw, 160px);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    animation: fadeUp 0.8s 1s forwards;
+  }
+
+  .scroll-hint::after {
+    content: '';
+    display: block;
+    width: 1px; height: 40px;
+    background: linear-gradient(to bottom, var(--muted), transparent);
+    animation: scrollLine 2s ease-in-out infinite;
+  }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 48px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    max-width: 80px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.4;
+  }
+
+  /* ── PROBLEM ── */
+  .problem {
+    padding: 100px clamp(24px, 8vw, 160px);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .problem__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2px;
+    margin-top: 56px;
+  }
+
+  @media (max-width: 900px) { .problem__grid { grid-template-columns: 1fr; gap: 1px; } }
+
+  .problem-item {
+    background: var(--ink);
+    padding: 36px 32px;
+    border-left: 2px solid transparent;
+    transition: border-color 0.3s, background 0.3s;
+  }
+
+  .problem-item:hover { background: #0c0c16; border-left-color: var(--gold); }
+
+  .problem-item__icon { font-size: 28px; margin-bottom: 20px; display: block; filter: saturate(0) brightness(1.2); transition: filter 0.3s; }
+  .problem-item:hover .problem-item__icon { filter: saturate(1) brightness(1.1); }
+
+  .problem-item__title { font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 10px; color: var(--text); }
+  .problem-item__desc  { font-size: 13px; color: var(--muted); line-height: 1.7; }
+
+  /* ── LAW PULL-QUOTE BLOCK ── */
+  .laws {
+    padding: 100px clamp(24px, 8vw, 160px);
+    background: var(--ink);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .laws__lead {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(28px, 3.5vw, 48px);
+    font-weight: 300;
+    line-height: 1.25;
+    max-width: 780px;
+    margin-bottom: 56px;
+  }
+  .laws__lead em { font-style: italic; color: var(--gold-light); }
+
+  .laws__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+  }
+  @media (max-width: 1000px) { .laws__grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px)  { .laws__grid { grid-template-columns: 1fr; } }
+
+  .law {
+    background: var(--panel);
+    padding: 28px 24px 32px;
+    transition: background 0.3s;
+    border-top: 2px solid transparent;
+  }
+  .law:hover { background: #1a1a26; border-top-color: var(--gold); }
+
+  .law__year { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.2em; color: var(--gold); margin-bottom: 12px; opacity: 0.8; }
+  .law__name { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; line-height: 1.15; margin-bottom: 12px; }
+  .law__desc { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+
+  /* ── HOW IT WORKS ── */
+  .how {
+    padding: 120px clamp(24px, 8vw, 160px);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .how__heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 4vw, 56px);
+    font-weight: 300;
+    margin-bottom: 64px;
+    max-width: 620px;
+  }
+  .how__heading em { font-style: italic; color: var(--gold-light); }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+  }
+
+  @media (max-width: 1000px) { .steps { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px)  { .steps { grid-template-columns: 1fr; } }
+
+  .step {
+    background: var(--panel);
+    padding: 36px 28px;
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .step:hover { background: #1a1a26; }
+
+  .step::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .step:hover::before { opacity: 1; }
+
+  .step:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    top: 50%; right: -12px;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: rgba(201,147,58,0.3);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  @media (max-width: 1000px) { .step::after { display: none; } }
+
+  .step__n { font-family: 'Cormorant Garamond', serif; font-size: 64px; font-weight: 300; line-height: 1; margin-bottom: 16px; color: rgba(201,147,58,0.2); }
+  .step__title { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
+  .step__desc  { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+  /* ── CLASSIFICATION (5-class v2) ── */
+  .cls-header {
+    padding: 80px clamp(24px, 8vw, 160px) 60px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+
+  .cls-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(40px, 6vw, 88px);
+    font-weight: 300;
+    line-height: 0.95;
+  }
+
+  .cls-heading span { display: block; font-style: italic; color: var(--gold-light); }
+
+  .cls-meta { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-align: right; line-height: 2; }
+
+  .cls-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px;
+    background: var(--surface);
+  }
+
+  @media (max-width: 1100px) { .cls-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 500px)  { .cls-grid { grid-template-columns: 1fr; } }
+
+  .cls-card {
+    background: var(--ink);
+    padding: 40px 28px 44px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.35s, transform 0.35s;
+  }
+
+  .cls-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--gold-dim) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.35s;
+    pointer-events: none;
+  }
+
+  .cls-card:hover { background: #0e0e18; transform: translateY(-2px); }
+  .cls-card:hover::after { opacity: 1; }
+
+  .cls-card__badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 22px;
+    padding: 4px 10px;
+    border: 1px solid rgba(201,147,58,0.3);
+    display: inline-block;
+  }
+
+  .cls-card__code {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(34px, 4vw, 60px);
+    font-weight: 300;
+    line-height: 1;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+
+  .cls-card__name { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .cls-card__desc { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 22px; }
+
+  .cls-card__uses { display: flex; flex-direction: column; gap: 8px; }
+
+  .cls-use {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 12px;
+    color: rgba(232,230,223,0.6);
+    line-height: 1.4;
+  }
+
+  .cls-use::before { content: '→'; font-family: 'Space Mono', monospace; color: var(--gold); flex-shrink: 0; font-size: 11px; margin-top: 1px; }
+
+  .cls-card__bar { position: absolute; bottom: 0; left: 0; height: 2px; width: 0; background: linear-gradient(90deg, var(--gold), transparent); transition: width 0.5s ease; }
+  .cls-card:hover .cls-card__bar { width: 100%; }
+
+  /* ── DELIVERABLES ── */
+  .deliverable {
+    padding: 120px clamp(24px, 8vw, 160px);
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .deliverable__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  @media (max-width: 900px) { .deliverable__grid { grid-template-columns: 1fr; } }
+
+  .deliverable__heading { font-family: 'Cormorant Garamond', serif; font-size: clamp(28px, 3.5vw, 48px); font-weight: 300; line-height: 1.15; margin-bottom: 24px; }
+  .deliverable__heading em { font-style: italic; color: var(--gold-light); }
+  .deliverable__text    { font-size: 14px; color: var(--muted); line-height: 1.8; margin-bottom: 32px; }
+
+  .deliver-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+  .deliver-list li { display: flex; align-items: flex-start; gap: 14px; font-size: 13.5px; line-height: 1.5; }
+  .deliver-list li::before { content: '→'; color: var(--gold); font-family: 'Space Mono', monospace; flex-shrink: 0; margin-top: 1px; }
+
+  .report-mock { background: var(--ink); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; font-family: 'Space Mono', monospace; font-size: 11.5px; }
+  .report-mock__bar { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: var(--panel); border-bottom: 1px solid var(--border); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; }
+  .dot.y { background: #ffbd2e; }
+  .dot.g { background: #28c940; }
+  .report-mock__title { margin-left: auto; color: var(--muted); font-size: 10px; letter-spacing: 0.1em; }
+  .report-mock__body { padding: 20px; display: flex; flex-direction: column; gap: 0; }
+
+  .mock-alert { padding: 14px 0; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
+  .mock-alert:last-child { border-bottom: none; }
+  .mock-alert__header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  .mock-sev { padding: 2px 10px; border-radius: 2px; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; flex-shrink: 0; }
+  .mock-sev.c1    { background: rgba(58,201,122,0.15); color: #66cc88; border: 1px solid rgba(58,201,122,0.3); }
+  .mock-sev.c2us  { background: rgba(201,58,58,0.15);  color: #d07070; border: 1px solid rgba(201,58,58,0.3); }
+  .mock-sev.c2eu  { background: rgba(201,184,58,0.15); color: #d4be4a; border: 1px solid rgba(201,184,58,0.3); }
+  .mock-sev.c3    { background: rgba(170,102,255,0.15);color: #b886ff; border: 1px solid rgba(170,102,255,0.3); }
+  .mock-sev.c2un  { background: rgba(120,120,120,0.1); color: #888;    border: 1px solid rgba(120,120,120,0.2); }
+
+  .mock-alert__title { font-size: 10.5px; color: var(--text); letter-spacing: 0.02em; }
+  .mock-alert__meta  { display: flex; gap: 12px; flex-wrap: wrap; }
+  .mock-meta-item    { font-size: 9px; letter-spacing: 0.08em; color: var(--muted); }
+  .mock-meta-item span { color: var(--gold); margin-right: 4px; }
+
+  .mock-verdict { font-size: 9px; letter-spacing: 0.08em; color: var(--muted); font-style: italic; margin-top: 2px; padding-left: 2px; line-height: 1.5; }
+
+  /* ── BENEFITS ── */
+  .benefits { padding: 120px clamp(24px, 8vw, 160px); }
+
+  .benefits__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 56px; }
+  @media (max-width: 800px) { .benefits__grid { grid-template-columns: 1fr; } }
+
+  .benefit { background: var(--panel); padding: 36px 32px; transition: background 0.3s; }
+  .benefit:hover { background: #1a1a26; }
+
+  .benefit__role { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; margin-bottom: 16px; opacity: 0.8; }
+  .benefit__title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 400; line-height: 1.15; margin-bottom: 14px; }
+  .benefit__title em { font-style: italic; color: var(--gold-light); }
+  .benefit__desc { font-size: 13.5px; color: var(--muted); line-height: 1.7; margin-bottom: 18px; }
+
+  .benefit__items { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .benefit__items li { font-size: 12.5px; color: var(--muted); display: flex; align-items: flex-start; gap: 10px; line-height: 1.5; }
+  .benefit__items li::before { content: '→'; color: var(--gold); font-family: 'Space Mono', monospace; flex-shrink: 0; font-size: 11px; margin-top: 2px; }
+
+  /* ── TRUST ── */
+  .trust {
+    padding: 120px clamp(24px, 8vw, 160px);
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .trust__lead {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(28px, 3.5vw, 48px);
+    font-weight: 300;
+    line-height: 1.2;
+    max-width: 720px;
+    margin-bottom: 56px;
+  }
+  .trust__lead em { font-style: italic; color: var(--gold-light); }
+
+  .trust__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+  @media (max-width: 800px) { .trust__grid { grid-template-columns: 1fr; } }
+
+  .trust-card { background: var(--ink); padding: 32px 28px; border-top: 2px solid transparent; transition: border-color 0.3s, background 0.3s; }
+  .trust-card:hover { background: #0e0e18; border-top-color: var(--gold); }
+
+  .trust-card__icon { font-size: 24px; margin-bottom: 14px; display: block; filter: saturate(0) brightness(1.3); }
+  .trust-card__title { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
+  .trust-card__desc { font-size: 12.5px; color: var(--muted); line-height: 1.7; }
+
+  /* ── CTA ── */
+  .cta { padding: 120px clamp(24px, 8vw, 160px); text-align: center; position: relative; overflow: hidden; }
+
+  .cta__glow { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 70% at 50% 50%, rgba(58,201,122,0.05) 0%, transparent 70%); pointer-events: none; }
+
+  .cta__heading { font-family: 'Cormorant Garamond', serif; font-size: clamp(36px, 5vw, 80px); font-weight: 300; line-height: 1.05; max-width: 760px; margin: 0 auto 24px; }
+  .cta__heading em { font-style: italic; color: var(--gold-light); }
+
+  .cta__sub { font-size: 15px; color: var(--muted); max-width: 560px; margin: 0 auto 48px; line-height: 1.7; }
+
+  .cta__links { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+
+  .cta-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 14px 32px;
+    border: 1px solid rgba(201,147,58,0.5);
+    color: var(--gold-light);
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.3s, border-color 0.3s;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .cta-btn:hover { background: rgba(201,147,58,0.08); border-color: var(--gold); }
+
+  .cta-btn.primary { background: rgba(201,147,58,0.12); border-color: var(--gold); }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 32px clamp(24px, 8vw, 160px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .footer__brand { color: var(--gold); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<!-- ══ HERO ══════════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero__glow"></div>
+  <div class="hero__glow-2"></div>
+
+  <div class="hero__live">
+    <span class="hero__live-dot"></span>
+    Live — Frankfurt, Germany
+  </div>
+
+  <div class="hero__eyebrow">SovraGuard — EU Data Sovereignty Platform</div>
+
+  <h1 class="hero__title">
+    Where does<br>
+    <em>your data</em><br>
+    really go?
+  </h1>
+
+  <div class="hero__domain">sovraguard.de &nbsp;·&nbsp; EU Data Sovereignty Dashboard</div>
+
+  <p class="hero__lead">
+    Every application your team uses opens hundreds of outbound connections every minute.
+    Most leave the EU. Many land with operators governed by foreign law — even when the
+    server sits in Frankfurt. SovraGuard makes those flows <em>visible</em>, <em>classified</em>,
+    and <em>defensible</em> — so your DPO, your board, and your auditor see the same picture.
+  </p>
+
+  <div class="hero__stats">
+    <div class="stat">
+      <span class="stat__number">24/7</span>
+      <span class="stat__label">Continuous monitoring</span>
+    </div>
+    <div class="stat">
+      <span class="stat__number">5</span>
+      <span class="stat__label">Sovereignty classes</span>
+    </div>
+    <div class="stat">
+      <span class="stat__number">100%</span>
+      <span class="stat__label">EU-hosted</span>
+    </div>
+    <div class="stat">
+      <span class="stat__number">0</span>
+      <span class="stat__label">Data leaves your network</span>
+    </div>
+  </div>
+
+  <div class="hero__divider"></div>
+  <div class="scroll-hint">Scroll</div>
+</section>
+
+<!-- ══ PROBLEM ═══════════════════════════════════════════════ -->
+<section class="problem">
+  <div class="section-label">The Problem</div>
+
+  <p style="font-family:'Cormorant Garamond',serif;font-size:clamp(24px,3vw,40px);font-weight:300;max-width:720px;line-height:1.3;margin-bottom:0">
+    European organisations are accountable for every byte of personal data they send abroad —
+    yet almost none can describe, in real time, where that data actually flows.
+  </p>
+
+  <div class="problem__grid">
+    <div class="problem-item">
+      <span class="problem-item__icon">🌫️</span>
+      <div class="problem-item__title">Outbound traffic is a blind spot</div>
+      <div class="problem-item__desc">
+        Every browser, SaaS app, smart device, and background service phones home to dozens
+        of destinations. Firewalls log, but nobody reads. Cloud dashboards show what runs
+        inside; nothing shows what runs <i>out</i>.
+      </div>
+    </div>
+    <div class="problem-item">
+      <span class="problem-item__icon">🌍</span>
+      <div class="problem-item__title">Location ≠ Sovereignty</div>
+      <div class="problem-item__desc">
+        A data centre in Frankfurt operated by a US company is still subject to US law.
+        Under the CLOUD Act, US authorities can compel that operator to hand over your data
+        — without a German court order, without notice. The pin on the map is misleading.
+      </div>
+    </div>
+    <div class="problem-item">
+      <span class="problem-item__icon">📋</span>
+      <div class="problem-item__title">Annual reviews can't keep up</div>
+      <div class="problem-item__desc">
+        Procurement reviews and DPIAs happen once. Your network changes every minute.
+        A new SaaS tool, a software update, a third-party SDK — each can silently route
+        personal data through a new jurisdiction. The spreadsheet is wrong by lunchtime.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ THE LEGAL REALITY ═════════════════════════════════════ -->
+<section class="laws">
+  <div class="section-label">The Legal Reality</div>
+
+  <p class="laws__lead">
+    Four legal instruments define what <em>EU data sovereignty</em> actually means today —
+    and why "hosted in Europe" is no longer a sufficient answer.
+  </p>
+
+  <div class="laws__grid">
+    <div class="law">
+      <div class="law__year">2018 · EU</div>
+      <div class="law__name">GDPR<br>Articles 44–49</div>
+      <div class="law__desc">
+        Personal data may only leave the EU under specific safeguards: an adequacy decision,
+        Standard Contractual Clauses, or a derogation. Every transfer must be documented
+        and justified.
+      </div>
+    </div>
+    <div class="law">
+      <div class="law__year">2018 · USA</div>
+      <div class="law__name">CLOUD Act</div>
+      <div class="law__desc">
+        Compels US-incorporated companies to disclose data they hold or control —
+        <i>regardless of where the servers are located</i>. Applies to every US cloud
+        and SaaS provider, including their European subsidiaries.
+      </div>
+    </div>
+    <div class="law">
+      <div class="law__year">2008 · USA</div>
+      <div class="law__name">FISA Section 702</div>
+      <div class="law__desc">
+        Authorises bulk surveillance of non-US persons by US intelligence agencies through
+        US "electronic communication service providers". Operates without individual
+        warrants and without notice to the data subject.
+      </div>
+    </div>
+    <div class="law">
+      <div class="law__year">2020 · CJEU</div>
+      <div class="law__name">Schrems II</div>
+      <div class="law__desc">
+        The European Court of Justice ruled that EU contractual clauses do not, on their
+        own, neutralise US surveillance law. Controllers must verify, case by case, that
+        equivalent protection exists — or stop the transfer.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ HOW IT WORKS ═══════════════════════════════════════════ -->
+<section class="how">
+  <div class="section-label">How SovraGuard Works</div>
+
+  <h2 class="how__heading">
+    From <em>invisible flow</em><br>
+    to a <em>defensible answer</em><br>
+    in real time.
+  </h2>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step__n">01</div>
+      <div class="step__title">Observe</div>
+      <div class="step__desc">SovraGuard listens to every outbound connection your network makes — every browser request, every SaaS callback, every API hop, every background sync.</div>
+    </div>
+    <div class="step">
+      <div class="step__n">02</div>
+      <div class="step__title">Identify</div>
+      <div class="step__desc">Each destination is resolved to its true operator and its legal home — not just where the server geolocates, but who actually owns and controls it.</div>
+    </div>
+    <div class="step">
+      <div class="step__n">03</div>
+      <div class="step__title">Classify</div>
+      <div class="step__desc">Five sovereignty classes — from EU-sovereign to CLOUD-Act-exposed. Every flow gets a colour, a reason, and a legal verdict in plain language.</div>
+    </div>
+    <div class="step">
+      <div class="step__n">04</div>
+      <div class="step__title">Decide</div>
+      <div class="step__desc">A live dashboard for the SOC. A weekly report for the DPO. A board summary for executives. The same evidence, in the format each role can act on.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FIVE CLASSES (V2 TAXONOMY) ═══════════════════════════ -->
+<section>
+  <div class="cls-header">
+    <h2 class="cls-heading">
+      The Five<br>
+      <span>Sovereignty Classes</span>
+    </h2>
+    <div class="cls-meta">
+      Live · Per destination<br>
+      Operator-jurisdiction first<br>
+      Aligned with Schrems II
+    </div>
+  </div>
+
+  <div class="cls-grid">
+
+    <div class="cls-card">
+      <div class="cls-card__badge" style="border-color:rgba(58,201,122,0.5);color:#66cc88">C1</div>
+      <div class="cls-card__code" style="color:#3ac97a">EU</div>
+      <div class="cls-card__name">EU Sovereign</div>
+      <div class="cls-card__desc">
+        Operator is registered in the EU-27 <i>and</i> the server sits in the EU.
+        GDPR fully applies. No foreign compulsion regime can reach the data.
+      </div>
+      <div class="cls-card__uses">
+        <div class="cls-use">Lowest legal exposure</div>
+        <div class="cls-use">No additional safeguards needed</div>
+      </div>
+      <div class="cls-card__bar"></div>
+    </div>
+
+    <div class="cls-card">
+      <div class="cls-card__badge" style="border-color:rgba(201,58,58,0.5);color:#d07070">C2 · US</div>
+      <div class="cls-card__code" style="color:#c93a3a">US</div>
+      <div class="cls-card__name">CLOUD Act Exposed</div>
+      <div class="cls-card__desc">
+        Operator is US-incorporated or US-controlled. Subject to the CLOUD Act and
+        FISA 702 — regardless of where the server physically sits. The most common
+        finding in any European network.
+      </div>
+      <div class="cls-card__uses">
+        <div class="cls-use">Schrems II safeguards required</div>
+        <div class="cls-use">Document — or replace</div>
+      </div>
+      <div class="cls-card__bar"></div>
+    </div>
+
+    <div class="cls-card">
+      <div class="cls-card__badge" style="border-color:rgba(201,184,58,0.5);color:#d4be4a">C2 · EU/Non-EU</div>
+      <div class="cls-card__code" style="color:#c9b83a">⚠</div>
+      <div class="cls-card__name">EU Operator, Non-EU Server</div>
+      <div class="cls-card__desc">
+        Operator is European, but the specific server is hosted outside the EU.
+        Host-country law applies on the physical layer. A genuine international
+        transfer requiring case-by-case review.
+      </div>
+      <div class="cls-card__uses">
+        <div class="cls-use">SCCs or BCRs required</div>
+        <div class="cls-use">Often invisible without monitoring</div>
+      </div>
+      <div class="cls-card__bar"></div>
+    </div>
+
+    <div class="cls-card">
+      <div class="cls-card__badge" style="border-color:rgba(170,102,255,0.5);color:#b886ff">C3</div>
+      <div class="cls-card__code" style="color:#aa66ff">🌐</div>
+      <div class="cls-card__name">Other Jurisdiction</div>
+      <div class="cls-card__desc">
+        Operator is registered outside the EU and outside the US — UK, India, Australia,
+        Israel, South Korea, UAE, China, Singapore, plus the ZOLL embargoed jurisdictions
+        (Russia, Iran, North Korea, Belarus, Syria, Myanmar, Cuba, Venezuela and others).
+        Each country has its own surveillance and compelled-access regime.
+      </div>
+      <div class="cls-card__uses">
+        <div class="cls-use">Per-country DPO review</div>
+        <div class="cls-use">UK IPA · India DPDP · AU TOLA · ZOLL embargo flag</div>
+      </div>
+      <div class="cls-card__bar"></div>
+    </div>
+
+    <div class="cls-card">
+      <div class="cls-card__badge" style="border-color:rgba(140,140,140,0.4);color:#aaa">C2 · Unverified</div>
+      <div class="cls-card__code" style="color:#888">?</div>
+      <div class="cls-card__name">Unknown — Treat as Exposed</div>
+      <div class="cls-card__desc">
+        Operator jurisdiction not yet determined. SovraGuard treats this as
+        CLOUD-Act-equivalent exposure until proven otherwise — the
+        <i>never-claim-clean</i> rule. Absence of evidence is never evidence of absence.
+      </div>
+      <div class="cls-card__uses">
+        <div class="cls-use">Defaults to higher-exposure</div>
+        <div class="cls-use">Promoted only with positive proof</div>
+      </div>
+      <div class="cls-card__bar"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ DELIVERABLES ═══════════════════════════════════════════ -->
+<section class="deliverable">
+  <div class="deliverable__grid">
+    <div>
+      <div class="section-label">What You See</div>
+      <h2 class="deliverable__heading">
+        One <em>dashboard</em>.<br>
+        Three views.<br>
+        Every role served.
+      </h2>
+      <p class="deliverable__text">
+        SovraGuard is built around the answer everyone has been asking for years:
+        <i>where, exactly, does our data go — and who controls it?</i>
+        The platform delivers that answer continuously, in a form your SOC can investigate,
+        your DPO can sign, and your board can read.
+      </p>
+      <ul class="deliver-list">
+        <li><b>Network Overview</b> — a live world map of every outbound connection, classification breakdown, hourly trend, and the top destinations on your network right now.</li>
+        <li><b>Threat Intelligence</b> — every destination cross-checked against trusted threat feeds. Malicious traffic surfaces immediately, not at the next quarterly review.</li>
+        <li><b>EU Residency</b> — the sovereignty answer per destination. Class, operator, jurisdiction, and a one-line legal reason — ready to drop into a DPIA or audit response.</li>
+        <li><b>Methodology Page</b> — a plain-language explainer of every class, every rule, and every legal source. No black box; every verdict is defensible.</li>
+        <li><b>Automated Reports</b> — weekly board summary, on-demand audit evidence, and immediate alerts when something high-risk appears.</li>
+      </ul>
+    </div>
+
+    <div class="report-mock">
+      <div class="report-mock__bar">
+        <span class="dot r"></span>
+        <span class="dot y"></span>
+        <span class="dot g"></span>
+        <span class="report-mock__title">SovraGuard · Live View</span>
+      </div>
+      <div class="report-mock__body">
+        <div class="mock-alert">
+          <div class="mock-alert__header">
+            <span class="mock-sev c2us">C2 · US</span>
+            <span class="mock-alert__title">Major US analytics provider</span>
+          </div>
+          <div class="mock-alert__meta">
+            <span class="mock-meta-item"><span>OPERATOR</span>US-incorporated</span>
+            <span class="mock-meta-item"><span>SERVER</span>Frankfurt edge</span>
+            <span class="mock-meta-item"><span>VOLUME</span>High</span>
+          </div>
+          <div class="mock-verdict">CLOUD Act applies regardless of server location — Schrems II safeguards required.</div>
+        </div>
+        <div class="mock-alert">
+          <div class="mock-alert__header">
+            <span class="mock-sev c1">C1 · EU</span>
+            <span class="mock-alert__title">European hosting provider</span>
+          </div>
+          <div class="mock-alert__meta">
+            <span class="mock-meta-item"><span>OPERATOR</span>EU-27 registered</span>
+            <span class="mock-meta-item"><span>SERVER</span>Germany</span>
+            <span class="mock-meta-item"><span>VOLUME</span>High</span>
+          </div>
+          <div class="mock-verdict">GDPR fully applies. No international transfer. No additional safeguards required.</div>
+        </div>
+        <div class="mock-alert">
+          <div class="mock-alert__header">
+            <span class="mock-sev c3">C3</span>
+            <span class="mock-alert__title">UK-based open-source vendor</span>
+          </div>
+          <div class="mock-alert__meta">
+            <span class="mock-meta-item"><span>OPERATOR</span>United Kingdom</span>
+            <span class="mock-meta-item"><span>REGIME</span>UK Investigatory Powers Act</span>
+            <span class="mock-meta-item"><span>VOLUME</span>Low</span>
+          </div>
+          <div class="mock-verdict">Manual DPO review — separate post-Brexit regime, not covered by EU adequacy.</div>
+        </div>
+        <div class="mock-alert">
+          <div class="mock-alert__header">
+            <span class="mock-sev c2eu">C2 · EU/Non-EU</span>
+            <span class="mock-alert__title">European operator · non-EU edge</span>
+          </div>
+          <div class="mock-alert__meta">
+            <span class="mock-meta-item"><span>OPERATOR</span>EU-27</span>
+            <span class="mock-meta-item"><span>SERVER</span>Outside EU</span>
+            <span class="mock-meta-item"><span>VOLUME</span>Low</span>
+          </div>
+          <div class="mock-verdict">Real international transfer — host-country law applies on the physical layer.</div>
+        </div>
+        <div class="mock-alert">
+          <div class="mock-alert__header">
+            <span class="mock-sev c2un">C2 · UNVERIFIED</span>
+            <span class="mock-alert__title">Unidentified destination</span>
+          </div>
+          <div class="mock-alert__meta">
+            <span class="mock-meta-item"><span>STATUS</span>Pending enrichment</span>
+            <span class="mock-meta-item"><span>POLICY</span>Treat as exposed</span>
+            <span class="mock-meta-item"><span>VOLUME</span>Low</span>
+          </div>
+          <div class="mock-verdict">Never-claim-clean: classified at higher exposure until positive evidence is found.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ BENEFITS BY ROLE ══════════════════════════════════════ -->
+<section class="benefits">
+  <div class="section-label">Who It's For</div>
+  <p style="font-family:'Cormorant Garamond',serif;font-size:clamp(24px,3vw,40px);font-weight:300;max-width:680px;line-height:1.3">
+    Three audiences. <em>One source of truth.</em>
+  </p>
+
+  <div class="benefits__grid">
+    <div class="benefit">
+      <div class="benefit__role">For the DPO</div>
+      <div class="benefit__title">Audit-ready evidence — <em>continuously</em>.</div>
+      <div class="benefit__desc">
+        Replace the annual spreadsheet with a live ledger. Every outbound flow, every
+        operator, every legal verdict — defensible and timestamped.
+      </div>
+      <ul class="benefit__items">
+        <li>Per-destination class with a written legal reason</li>
+        <li>Records of Processing Activity, automatically backed by data</li>
+        <li>One click from class to underlying evidence</li>
+        <li>No more "we believe we are compliant" — show it</li>
+      </ul>
+    </div>
+
+    <div class="benefit">
+      <div class="benefit__role">For the SOC / IT Security</div>
+      <div class="benefit__title">Outbound visibility, <em>finally</em>.</div>
+      <div class="benefit__desc">
+        See every connection your perimeter creates. Spot unknown destinations the moment
+        they appear. Cross-check against threat intelligence in the same view.
+      </div>
+      <ul class="benefit__items">
+        <li>Live world map of all destinations</li>
+        <li>Threat-intelligence overlay on real traffic</li>
+        <li>Filter by class, operator, country, time</li>
+        <li>One platform — sovereignty <i>and</i> security</li>
+      </ul>
+    </div>
+
+    <div class="benefit">
+      <div class="benefit__role">For the Board</div>
+      <div class="benefit__title">A defensible answer in <em>plain language</em>.</div>
+      <div class="benefit__desc">
+        When the regulator asks, the customer asks, or the journalist asks —
+        you have the answer ready. No black box. No hand-waving.
+      </div>
+      <ul class="benefit__items">
+        <li>Weekly executive summary by email</li>
+        <li>Concrete share of EU-sovereign vs. exposed traffic</li>
+        <li>Evidence trail back to the wire</li>
+        <li>Methodology page anyone can read</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TRUST / SOVEREIGNTY ═══════════════════════════════════ -->
+<section class="trust">
+  <div class="section-label">Sovereign by Design</div>
+  <p class="trust__lead">
+    A platform that monitors data sovereignty must, itself, be <em>sovereign</em>.
+    SovraGuard is built on principles you can verify.
+  </p>
+
+  <div class="trust__grid">
+    <div class="trust-card">
+      <span class="trust-card__icon">🇪🇺</span>
+      <div class="trust-card__title">100% EU-Hosted</div>
+      <div class="trust-card__desc">
+        The platform runs in Frankfurt, Germany. Your network telemetry is processed
+        and stored under GDPR, in the EU, by an EU-controlled operator. No exception.
+      </div>
+    </div>
+    <div class="trust-card">
+      <span class="trust-card__icon">🔒</span>
+      <div class="trust-card__title">Your Data Never Leaves</div>
+      <div class="trust-card__desc">
+        SovraGuard analyses your traffic on infrastructure you control or that we host
+        in the EU on your behalf. No third-party SaaS. No data shipped abroad for processing.
+        No analytics callbacks of our own.
+      </div>
+    </div>
+    <div class="trust-card">
+      <span class="trust-card__icon">📖</span>
+      <div class="trust-card__title">Explainable Verdicts</div>
+      <div class="trust-card__desc">
+        Every classification carries a plain-language reason and the legal source behind it.
+        The methodology is published, reviewable, and aligned with the EU operator-jurisdiction
+        consensus.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CTA ════════════════════════════════════════════════════ -->
+<section class="cta">
+  <div class="cta__glow"></div>
+  <h2 class="cta__heading">
+    Stop guessing.<br>
+    <em>Start seeing</em>.
+  </h2>
+  <p class="cta__sub">
+    A live, EU-hosted view of every outbound connection your organisation makes —
+    classified, explained, and audit-ready. Built for European data controllers,
+    by a European team.
+  </p>
+  <div class="cta__links">
+    <a class="cta-btn primary" href="https://sovraguard.de" target="_blank">Open SovraGuard</a>
+    <a class="cta-btn" href="mailto:contact@dlxellence.com?subject=SovraGuard%20Demo%20Request">Request a Demo</a>
+    <a class="cta-btn" href="https://sovraguard.de/methodology.html" target="_blank">Methodology</a>
+  </div>
+</section>
+
+<!-- ══ FOOTER ═════════════════════════════════════════════════ -->
+<footer>
+  <div><span class="footer__brand">SOVRAGUARD</span> — EU Data Sovereignty Dashboard</div>
+  <div>Digital Leadership Xellence GmbH &nbsp;·&nbsp; Frankfurt, Germany (EU)</div>
+  <div>2026 &nbsp;·&nbsp; sovraguard.de</div>
+</footer>
+
+</body>
+</html>
