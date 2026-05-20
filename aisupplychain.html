@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shadow AI — EU Data Sovereignty · Security &amp; Compliance Assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:        #08080d;
+    --surface:    #0f0f17;
+    --panel:      #14141e;
+    --border:     rgba(255,255,255,0.07);
+    --gold:       #c9933a;
+    --gold-light: #e8b96a;
+    --gold-dim:   rgba(201,147,58,0.15);
+    --text:       #e8e6df;
+    --muted:      rgba(232,230,223,0.45);
+
+    /* sovereignty tiers */
+    --eu:      #3ac97a;
+    --aligned: #c9b83a;
+    --scc:     #c96a3a;
+    --risk:    #c93a3a;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.6;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+  }
+
+  section { position: relative; z-index: 1; }
+
+  /* —— HERO —— */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px clamp(24px, 8vw, 160px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero__glow {
+    position: absolute;
+    width: 700px; height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(58,201,122,0.06) 0%, transparent 70%);
+    top: -200px; right: -200px;
+    pointer-events: none;
+  }
+
+  .hero__glow-2 {
+    position: absolute;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,147,58,0.05) 0%, transparent 70%);
+    bottom: 80px; left: 5%;
+    pointer-events: none;
+  }
+
+  .hero__eu {
+    position: absolute;
+    top: 48px;
+    right: clamp(24px, 8vw, 160px);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--eu);
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 0.6s 1.2s forwards;
+  }
+
+  @keyframes pulseDot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .hero__eu-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--eu);
+    box-shadow: 0 0 6px var(--eu);
+    animation: pulseDot 2s ease-in-out infinite;
+  }
+
+  .hero__eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.1s forwards;
+  }
+
+  .hero__eyebrow::before {
+    content: '';
+    display: block;
+    width: 32px; height: 1px;
+    background: var(--gold);
+  }
+
+  .hero__title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(48px, 8.5vw, 132px);
+    font-weight: 300;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.25s forwards;
+  }
+
+  .hero__title em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+
+  .hero__positioning {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(13px, 1.6vw, 17px);
+    color: var(--gold-light);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-top: 24px;
+    margin-bottom: 8px;
+    padding-left: 44px;
+    position: relative;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.3s forwards;
+    line-height: 1.5;
+  }
+
+  .hero__positioning::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 50%;
+    width: 32px; height: 1px;
+    background: var(--gold-light);
+    opacity: 0.6;
+  }
+
+  .hero__domain {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(13px, 1.5vw, 18px);
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 48px;
+    margin-top: 18px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.35s forwards;
+  }
+
+  .hero__lead {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(18px, 2.2vw, 27px);
+    font-weight: 300;
+    line-height: 1.55;
+    max-width: 780px;
+    color: rgba(232,230,223,0.8);
+    margin-bottom: 60px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.45s forwards;
+  }
+
+  .hero__stats {
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+  }
+
+  .stat { display: flex; flex-direction: column; gap: 4px; }
+
+  .stat__number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 48px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--gold-light);
+  }
+
+  .stat__label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .hero__divider {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.3;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 40px;
+    right: clamp(24px, 8vw, 160px);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    animation: fadeUp 0.8s 1s forwards;
+  }
+
+  .scroll-hint::after {
+    content: '';
+    display: block;
+    width: 1px; height: 40px;
+    background: linear-gradient(to bottom, var(--muted), transparent);
+    animation: scrollLine 2s ease-in-out infinite;
+  }
+
+  @keyframes scrollLine {
+    0%, 100% { opacity: 0.4; transform: scaleY(1); }
+    50%      { opacity: 1;   transform: scaleY(0.6); }
+  }
+
+  /* —— PROBLEM —— */
+  .problem {
+    padding: 100px clamp(24px, 8vw, 160px);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .problem__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2px;
+    margin-top: 56px;
+  }
+
+  @media (max-width: 900px) { .problem__grid { grid-template-columns: 1fr; gap: 1px; } }
+
+  .problem-item {
+    background: var(--ink);
+    padding: 36px 32px;
+    border-left: 2px solid transparent;
+    transition: border-color 0.3s, background 0.3s;
+  }
+
+  .problem-item:hover {
+    background: #0c0c16;
+    border-left-color: var(--gold);
+  }
+
+  .problem-item__icon {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px;
+    font-weight: 300;
+    color: var(--gold-light);
+    line-height: 1;
+    margin-bottom: 20px;
+    display: block;
+    font-style: italic;
+  }
+
+  .problem-item__title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  .problem-item__desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* —— OVERVIEW —— */
+  .overview {
+    padding: 120px clamp(24px, 8vw, 160px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 48px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    max-width: 80px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.4;
+  }
+
+  .overview__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  @media (max-width: 900px) { .overview__grid { grid-template-columns: 1fr; gap: 48px; } }
+
+  .overview__heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 4vw, 56px);
+    font-weight: 300;
+    line-height: 1.1;
+    margin-bottom: 24px;
+  }
+
+  .overview__text {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 20px;
+  }
+
+  .pillars {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin-top: 8px;
+  }
+
+  .pillar {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 20px;
+    align-items: start;
+    padding: 24px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .pillar:last-child { border-bottom: 1px solid var(--border); }
+
+  .pillar__num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    padding-top: 2px;
+  }
+
+  .pillar__title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .pillar__desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* —— HOW IT WORKS —— */
+  .how {
+    padding: 120px clamp(24px, 8vw, 160px);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .how__heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 4vw, 56px);
+    font-weight: 300;
+    margin-bottom: 64px;
+    max-width: 640px;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px;
+  }
+
+  @media (max-width: 1000px) { .steps { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 600px)  { .steps { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 400px)  { .steps { grid-template-columns: 1fr; } }
+
+  .step {
+    background: var(--panel);
+    padding: 32px 28px;
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .step:hover { background: #1a1a26; }
+
+  .step::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .step:hover::before { opacity: 1; }
+
+  .step:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    top: 50%; right: -12px;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: rgba(201,147,58,0.3);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  @media (max-width: 1000px) { .step::after { display: none; } }
+
+  .step__n {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 64px;
+    font-weight: 300;
+    line-height: 1;
+    margin-bottom: 16px;
+    color: rgba(201,147,58,0.2);
+  }
+
+  .step__title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .step__desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  /* —— SOVEREIGNTY TIERS —— */
+  .svc-header {
+    padding: 80px clamp(24px, 8vw, 160px) 60px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+
+  .svc-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(40px, 6vw, 88px);
+    font-weight: 300;
+    line-height: 0.95;
+  }
+
+  .svc-heading span {
+    display: block;
+    font-style: italic;
+    color: var(--gold-light);
+  }
+
+  .svc-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-align: right;
+    line-height: 2;
+  }
+
+  .svc-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    background: var(--surface);
+  }
+
+  @media (max-width: 1100px) { .svc-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px)  { .svc-grid { grid-template-columns: 1fr; } }
+
+  .svc-card {
+    background: var(--ink);
+    padding: 44px 32px 48px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.35s, transform 0.35s;
+  }
+
+  .svc-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--gold-dim) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.35s;
+    pointer-events: none;
+  }
+
+  .svc-card:hover { background: #0e0e18; transform: translateY(-2px); }
+  .svc-card:hover::after { opacity: 1; }
+
+  .svc-card__badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    padding: 4px 10px;
+    display: inline-block;
+    border: 1px solid;
+  }
+
+  .svc-card[data-tier="eu"]      .svc-card__badge { color: var(--eu);      border-color: rgba(58,201,122,0.4); }
+  .svc-card[data-tier="aligned"] .svc-card__badge { color: var(--aligned); border-color: rgba(201,184,58,0.4); }
+  .svc-card[data-tier="scc"]     .svc-card__badge { color: var(--scc);     border-color: rgba(201,106,58,0.4); }
+  .svc-card[data-tier="risk"]    .svc-card__badge { color: var(--risk);    border-color: rgba(201,58,58,0.4); }
+
+  .svc-card__flag {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 44px;
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+
+  .svc-card[data-tier="eu"]      .svc-card__flag { color: var(--eu); }
+  .svc-card[data-tier="aligned"] .svc-card__flag { color: var(--aligned); }
+  .svc-card[data-tier="scc"]     .svc-card__flag { color: var(--scc); }
+  .svc-card[data-tier="risk"]    .svc-card__flag { color: var(--risk); }
+
+  .svc-card__name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(26px, 2.8vw, 32px);
+    font-weight: 300;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    letter-spacing: -0.01em;
+  }
+
+  .svc-card__desc {
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+
+  .svc-card__points { display: flex; flex-direction: column; gap: 8px; }
+
+  .svc-point {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 12.5px;
+    color: rgba(232,230,223,0.6);
+    line-height: 1.4;
+  }
+
+  .svc-point::before {
+    content: '—';
+    font-family: 'Space Mono', monospace;
+    color: var(--gold);
+    flex-shrink: 0;
+    font-size: 11px;
+    margin-top: 1px;
+  }
+
+  .svc-card__bar {
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 2px; width: 0;
+    transition: width 0.5s ease;
+  }
+
+  .svc-card[data-tier="eu"]      .svc-card__bar { background: linear-gradient(90deg, var(--eu),      transparent); }
+  .svc-card[data-tier="aligned"] .svc-card__bar { background: linear-gradient(90deg, var(--aligned), transparent); }
+  .svc-card[data-tier="scc"]     .svc-card__bar { background: linear-gradient(90deg, var(--scc),     transparent); }
+  .svc-card[data-tier="risk"]    .svc-card__bar { background: linear-gradient(90deg, var(--risk),    transparent); }
+
+  .svc-card:hover .svc-card__bar { width: 100%; }
+
+  /* —— VALUE / WHAT YOU GAIN —— */
+  .value {
+    padding: 120px clamp(24px, 8vw, 160px);
+  }
+
+  .value__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-top: 56px;
+  }
+
+  @media (max-width: 900px) { .value__grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 500px) { .value__grid { grid-template-columns: 1fr; } }
+
+  .value-card {
+    background: var(--panel);
+    padding: 36px 28px;
+    text-align: left;
+    border-top: 2px solid var(--gold);
+    transition: transform 0.3s, background 0.3s;
+  }
+
+  .value-card:hover { transform: translateY(-4px); background: #1a1a26; }
+
+  .value-card__name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 400;
+    margin-bottom: 14px;
+    color: var(--gold-light);
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+  }
+
+  .value-card__def {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* —— DELIVERABLE / MOCK —— */
+  .deliverable {
+    padding: 120px clamp(24px, 8vw, 160px);
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .deliverable__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  @media (max-width: 900px) { .deliverable__grid { grid-template-columns: 1fr; } }
+
+  .deliverable__heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(28px, 3.5vw, 48px);
+    font-weight: 300;
+    line-height: 1.15;
+    margin-bottom: 24px;
+  }
+
+  .deliverable__text {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 32px;
+  }
+
+  .deliver-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+
+  .deliver-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+
+  .deliver-list li::before {
+    content: '›';
+    color: var(--gold);
+    font-family: 'Space Mono', monospace;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .report-mock {
+    background: var(--ink);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    font-family: 'Space Mono', monospace;
+    font-size: 11.5px;
+  }
+
+  .report-mock__bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; }
+  .dot.y { background: #ffbd2e; }
+  .dot.g { background: #28c940; }
+
+  .report-mock__title {
+    margin-left: 12px;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .report-mock__body {
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .mock-kpi {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    background: var(--border);
+    margin-bottom: 6px;
+  }
+
+  .mock-kpi__cell {
+    background: var(--ink);
+    padding: 14px 10px;
+    text-align: center;
+  }
+
+  .mock-kpi__cell.eu      { border-top: 2px solid var(--eu); }
+  .mock-kpi__cell.aligned { border-top: 2px solid var(--aligned); }
+  .mock-kpi__cell.scc     { border-top: 2px solid var(--scc); }
+  .mock-kpi__cell.risk    { border-top: 2px solid var(--risk); }
+
+  .mock-kpi__count {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1;
+  }
+
+  .mock-kpi__cell.eu      .mock-kpi__count { color: var(--eu); }
+  .mock-kpi__cell.aligned .mock-kpi__count { color: var(--aligned); }
+  .mock-kpi__cell.scc     .mock-kpi__count { color: var(--scc); }
+  .mock-kpi__cell.risk    .mock-kpi__count { color: var(--risk); }
+
+  .mock-kpi__label {
+    margin-top: 6px;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .mock-finding {
+    background: var(--panel);
+    border-left: 2px solid var(--gold);
+    padding: 12px 16px;
+  }
+
+  .mock-finding.eu      { border-left-color: var(--eu); }
+  .mock-finding.aligned { border-left-color: var(--aligned); }
+  .mock-finding.scc     { border-left-color: var(--scc); }
+  .mock-finding.risk    { border-left-color: var(--risk); }
+
+  .mock-finding__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+
+  .mock-sev {
+    font-size: 9px;
+    padding: 2px 8px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border-radius: 2px;
+    font-weight: 700;
+  }
+
+  .mock-sev.eu      { background: rgba(58,201,122,0.15);  color: var(--eu); }
+  .mock-sev.aligned { background: rgba(201,184,58,0.15);  color: var(--aligned); }
+  .mock-sev.scc     { background: rgba(201,106,58,0.15);  color: var(--scc); }
+  .mock-sev.risk    { background: rgba(201,58,58,0.15);   color: var(--risk); }
+
+  .mock-finding__title {
+    font-family: 'Syne', sans-serif;
+    font-size: 12.5px;
+    color: var(--text);
+    font-weight: 400;
+  }
+
+  .mock-finding__meta {
+    display: flex;
+    gap: 14px;
+    font-size: 10px;
+    color: var(--muted);
+    flex-wrap: wrap;
+  }
+
+  .mock-meta-item {
+    display: flex;
+    gap: 6px;
+  }
+
+  .mock-meta-item span { color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; }
+
+  /* —— TRUST —— */
+  .trust {
+    padding: 120px clamp(24px, 8vw, 160px);
+  }
+
+  .trust__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 64px;
+  }
+
+  @media (max-width: 900px) { .trust__grid { grid-template-columns: 1fr; } }
+
+  .trust-block {
+    background: var(--surface);
+    padding: 40px 32px;
+    border-top: 2px solid var(--gold);
+    transition: background 0.3s;
+  }
+
+  .trust-block:hover { background: var(--panel); }
+
+  .trust-block__label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .trust-block__title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-weight: 400;
+    margin-bottom: 14px;
+    line-height: 1.15;
+  }
+
+  .trust-block__desc {
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* —— CTA —— */
+  .cta {
+    padding: 140px clamp(24px, 8vw, 160px);
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta__glow {
+    position: absolute;
+    width: 900px; height: 500px;
+    background: radial-gradient(ellipse, rgba(201,147,58,0.08) 0%, transparent 60%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .cta__heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(40px, 6vw, 88px);
+    font-weight: 300;
+    line-height: 1;
+    margin-bottom: 32px;
+    position: relative;
+  }
+
+  .cta__heading em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+
+  .cta__sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(18px, 2vw, 24px);
+    font-weight: 300;
+    max-width: 680px;
+    margin: 0 auto 48px;
+    color: rgba(232,230,223,0.75);
+    line-height: 1.5;
+    position: relative;
+  }
+
+  .cta__url {
+    font-family: 'Space Mono', monospace;
+    font-size: 16px;
+    letter-spacing: 0.15em;
+    color: var(--gold-light);
+    text-decoration: none;
+    padding: 18px 40px;
+    border: 1px solid var(--gold);
+    display: inline-block;
+    transition: all 0.3s;
+    position: relative;
+    text-transform: uppercase;
+  }
+
+  .cta__url:hover {
+    background: var(--gold);
+    color: var(--ink);
+    letter-spacing: 0.22em;
+  }
+
+  /* —— FOOTER —— */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 32px clamp(24px, 8vw, 160px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .footer__brand {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .footer__copy {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: rgba(232,230,223,0.2);
+  }
+
+  /* —— ANIMATIONS —— */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @media print {
+    body::before, body::after { display: none; }
+    .svc-card:hover, .step:hover, .value-card:hover { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ———————— HERO ———————— -->
+<section class="hero">
+  <div class="hero__glow"></div>
+  <div class="hero__glow-2"></div>
+
+  <div class="hero__eu">
+    <div class="hero__eu-dot"></div>
+    European&nbsp;·&nbsp;Sovereignty-First&nbsp;·&nbsp;Zero PII Stored
+  </div>
+
+  <p class="hero__eyebrow">For DPOs · CISOs · Privacy &amp; Compliance Leaders</p>
+
+  <h1 class="hero__title">
+    Shadow AI,<br>
+    Seen.<br>
+    <em>Sovereign.</em>
+  </h1>
+
+  <p class="hero__positioning">Shadow AI — EU Data Sovereignty · Security &amp; Compliance Assessment</p>
+
+  <p class="hero__domain">aisupplychain.eu</p>
+
+  <p class="hero__lead">
+    Your employees are using AI tools every day. Most of them were never approved, reviewed, or signed off. We give your DPO and CISO a clear answer to the question that matters most: <em>which AI tools are actually handling our data — and where does that data really go?</em>
+  </p>
+
+  <div class="hero__stats">
+    <div class="stat">
+      <span class="stat__number">EU</span>
+      <span class="stat__label">Sovereignty · By Design</span>
+    </div>
+    <div class="stat">
+      <span class="stat__number">0</span>
+      <span class="stat__label">Personal Data Stored</span>
+    </div>
+    <div class="stat">
+      <span class="stat__number">500+</span>
+      <span class="stat__label">AI Tools Tracked</span>
+    </div>
+    <div class="stat">
+      <span class="stat__number">Ready</span>
+      <span class="stat__label">For Your Auditor</span>
+    </div>
+  </div>
+
+  <div class="hero__divider"></div>
+  <div class="scroll-hint">Scroll</div>
+</section>
+
+<!-- ———————— PROBLEM ———————— -->
+<section class="problem">
+  <div class="section-label">Why This Matters</div>
+  <div class="problem__grid reveal">
+    <div class="problem-item">
+      <span class="problem-item__icon">I</span>
+      <div class="problem-item__title">Shadow AI Is Already Here</div>
+      <div class="problem-item__desc">Your employees are pasting source code, customer records, contracts, and sensitive documents into AI tools faster than procurement can approve them. Most organisations cannot name a single AI tool in daily use that has been properly reviewed.</div>
+    </div>
+    <div class="problem-item">
+      <span class="problem-item__icon">II</span>
+      <div class="problem-item__title">Your DPO Cannot Answer the Audit</div>
+      <div class="problem-item__desc">Cross-border transfer rules demand documented safeguards. But if your compliance team cannot name the tool, cannot tell where the data is processed, and cannot produce the paperwork — they cannot satisfy an audit, a customer question, or a data-subject request.</div>
+    </div>
+    <div class="problem-item">
+      <span class="problem-item__icon">III</span>
+      <div class="problem-item__title">"EU-Branded" Doesn't Mean EU-Processed</div>
+      <div class="problem-item__desc">An AI assistant with a European website may silently forward every prompt to a US-operated model. The front door wears an EU flag; the actual processing crosses the Atlantic. Without visibility into what sits behind the branding, your report measures the wrong thing.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ———————— OVERVIEW ———————— -->
+<section class="overview">
+  <div class="section-label">What We Do For You</div>
+  <div class="overview__grid reveal">
+    <div>
+      <h2 class="overview__heading">The AI inventory your DPO has been asking for</h2>
+      <p class="overview__text">
+        We surface every AI tool your organisation actually uses — not the curated list someone drafted in a meeting, but the live reality of what employees reach for in their browsers every day. Then we classify each tool for EU data sovereignty, security posture, and compliance exposure.
+      </p>
+      <p class="overview__text">
+        You receive a clear, defensible picture: which tools are sovereign, which are aligned, which need safeguards, and which are exposing your organisation to foreign jurisdictions. With evidence your DPO can hand to an auditor — and your CISO can take to the board.
+      </p>
+    </div>
+    <div class="pillars">
+      <div class="pillar">
+        <span class="pillar__num">01</span>
+        <div>
+          <div class="pillar__title">Continuous Discovery</div>
+          <div class="pillar__desc">We see what your employees actually use — every AI tool reached through the corporate network. Not a snapshot, not a survey. Continuously, so nothing new slips past you between quarterly reviews.</div>
+        </div>
+      </div>
+      <div class="pillar">
+        <span class="pillar__num">02</span>
+        <div>
+          <div class="pillar__title">Sovereignty Classification</div>
+          <div class="pillar__desc">Every tool is placed in a clear EU-sovereignty tier. Who operates it. Where the data actually goes. Whether foreign intelligence laws reach it. Not opinions — evidence, sourced per tool.</div>
+        </div>
+      </div>
+      <div class="pillar">
+        <span class="pillar__num">03</span>
+        <div>
+          <div class="pillar__title">Zero Personal Data</div>
+          <div class="pillar__desc">We work only with aggregated signals. No individual users. No personal data stored. The platform itself respects the rules it's helping you prove. A privacy tool that is itself privacy-safe.</div>
+        </div>
+      </div>
+      <div class="pillar">
+        <span class="pillar__num">04</span>
+        <div>
+          <div class="pillar__title">Evidence Your Auditor Accepts</div>
+          <div class="pillar__desc">Every claim is traceable to its source. No assertions without provenance. A report your DPO can sign, your auditor can verify, and your regulator can read without translation.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ———————— HOW IT WORKS ———————— -->
+<section class="how">
+  <div class="section-label">How It Works</div>
+  <h2 class="how__heading reveal">From invisible<br>to inventoried<br>— in five controlled steps</h2>
+  <div class="steps reveal">
+    <div class="step">
+      <div class="step__n">01</div>
+      <div class="step__title">Connect</div>
+      <div class="step__desc">We connect to your existing web proxy or secure access platform — the one already logging where your employees go on the internet. No agents on endpoints. No changes to user experience.</div>
+    </div>
+    <div class="step">
+      <div class="step__n">02</div>
+      <div class="step__title">Discover</div>
+      <div class="step__desc">Every AI tool reached through your network is identified and catalogued — branded assistants, model APIs, productivity plugins, developer tools. Nothing that isn't AI is pulled in.</div>
+    </div>
+    <div class="step">
+      <div class="step__n">03</div>
+      <div class="step__title">Classify</div>
+      <div class="step__desc">Each tool is placed in a clear EU-sovereignty tier. Who runs it, where the data flows, what legal paperwork exists, what foreign jurisdictions apply. Evidence captured per tool.</div>
+    </div>
+    <div class="step">
+      <div class="step__n">04</div>
+      <div class="step__title">Review</div>
+      <div class="step__desc">Unknown or ambiguous findings go through human review before they reach your report. Nothing is guessed at. Nothing is labelled "compliant" on autopilot.</div>
+    </div>
+    <div class="step">
+      <div class="step__n">05</div>
+      <div class="step__title">Report</div>
+      <div class="step__desc">Your DPO receives a clear weekly digest. Your CISO gets live visibility. On demand, a full assessment report — ready to hand to an auditor, a regulator, or a procurement team.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ———————— SOVEREIGNTY TIERS ———————— -->
+<div class="svc-header reveal" style="position:relative;z-index:1;">
+  <h2 class="svc-heading">
+    Four Sovereignty<br>
+    <span>Tiers</span>
+  </h2>
+  <div class="svc-meta">
+    EU Verified &nbsp;·&nbsp; EU Aligned &nbsp;·&nbsp; Safeguards Required &nbsp;·&nbsp; High Risk<br>
+    A clear classification every tool gets
+  </div>
+</div>
+
+<div class="svc-grid" style="position:relative;z-index:1;">
+
+  <div class="svc-card" data-tier="eu">
+    <div class="svc-card__badge">Tier 01</div>
+    <div class="svc-card__flag">EU</div>
+    <div class="svc-card__name">Fully Sovereign</div>
+    <div class="svc-card__desc">European operator, European hosting, proper paperwork in place, processing stays on European soil. No cross-border transfer takes place. Safe to use without additional safeguards.</div>
+    <div class="svc-card__points">
+      <div class="svc-point">European legal entity</div>
+      <div class="svc-point">European hosting confirmed</div>
+      <div class="svc-point">Data processing paperwork signed</div>
+      <div class="svc-point">DPO green-light</div>
+    </div>
+    <div class="svc-card__bar"></div>
+  </div>
+
+  <div class="svc-card" data-tier="aligned">
+    <div class="svc-card__badge">Tier 02</div>
+    <div class="svc-card__flag">EU*</div>
+    <div class="svc-card__name">EU-Aligned</div>
+    <div class="svc-card__desc">Non-European operator, but the tool offers a verifiable European-only residency option with the right contractual safeguards. Acceptable — provided the European mode is explicitly enabled and confirmed.</div>
+    <div class="svc-card__points">
+      <div class="svc-point">European residency mode available</div>
+      <div class="svc-point">Data processing paperwork in place</div>
+      <div class="svc-point">Enable the EU-only flag explicitly</div>
+      <div class="svc-point">Confirm at contract time</div>
+    </div>
+    <div class="svc-card__bar"></div>
+  </div>
+
+  <div class="svc-card" data-tier="scc">
+    <div class="svc-card__badge">Tier 03</div>
+    <div class="svc-card__flag">INT</div>
+    <div class="svc-card__name">Safeguards Required</div>
+    <div class="svc-card__desc">Operator in a third country without an EU adequacy decision. Data transfer requires the standard European contractual safeguards. Acceptable only after your legal team has signed off — not a blanket approval.</div>
+    <div class="svc-card__points">
+      <div class="svc-point">Third-country operator</div>
+      <div class="svc-point">No automatic adequacy</div>
+      <div class="svc-point">Contractual safeguards required</div>
+      <div class="svc-point">Legal review before use</div>
+    </div>
+    <div class="svc-card__bar"></div>
+  </div>
+
+  <div class="svc-card" data-tier="risk">
+    <div class="svc-card__badge">Tier 04</div>
+    <div class="svc-card__flag">⚠</div>
+    <div class="svc-card__name">High Risk</div>
+    <div class="svc-card__desc">Operator subject to foreign intelligence access laws with broad reach over stored and in-transit data. Data is reachable regardless of European-facing marketing. Immediate alert — and a concrete European alternative is proposed.</div>
+    <div class="svc-card__points">
+      <div class="svc-point">Foreign intelligence exposure</div>
+      <div class="svc-point">EU-facing marketing does not remove risk</div>
+      <div class="svc-point">Immediate DPO &amp; CISO alert</div>
+      <div class="svc-point">European alternative suggested</div>
+    </div>
+    <div class="svc-card__bar"></div>
+  </div>
+
+</div>
+
+<!-- ———————— VALUE / WHAT YOU GAIN ———————— -->
+<section class="value">
+  <div class="section-label">What You Gain</div>
+  <h2 class="reveal" style="font-family:'Cormorant Garamond',serif;font-size:clamp(28px,3.5vw,48px);font-weight:300;max-width:680px;line-height:1.1">Answers to the questions<br>your DPO, CISO, and board<br>are already being asked</h2>
+  <div class="value__grid reveal">
+    <div class="value-card">
+      <div class="value-card__name">DPO Confidence</div>
+      <div class="value-card__def">A clean, live inventory of every AI tool actually in use — with sovereignty classification, evidence, and a clear list of what needs attention. No more guessing. No more policy-document fiction.</div>
+    </div>
+    <div class="value-card">
+      <div class="value-card__name">CISO Visibility</div>
+      <div class="value-card__def">A clear picture of where your data is really going, which foreign jurisdictions have reach, and where the quiet side-channels (developer APIs, plugins, integrations) are opening up without oversight.</div>
+    </div>
+    <div class="value-card">
+      <div class="value-card__name">Audit-Ready</div>
+      <div class="value-card__def">A defensible record for regulators, customer audits, and enterprise procurement questionnaires. Evidence of active control — not a policy document hoping the question doesn't get asked in detail.</div>
+    </div>
+    <div class="value-card">
+      <div class="value-card__name">A Path Forward</div>
+      <div class="value-card__def">For every high-risk tool in active use, a concrete European alternative with a match rating and migration effort estimate. Your procurement team gets a real next step, not just a warning.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ———————— DELIVERABLE / MOCK ———————— -->
+<section class="deliverable">
+  <div class="deliverable__grid reveal">
+    <div>
+      <div class="section-label">What You Receive</div>
+      <h2 class="deliverable__heading">A dashboard for your CISO. A report for your DPO. An answer for your board.</h2>
+      <p class="deliverable__text">
+        The assessment runs continuously. Your team gets a live dashboard. Your DPO receives a weekly digest. On demand, a full sovereignty assessment report — ready to hand to an auditor, a regulator, or a customer asking tough questions in procurement.
+      </p>
+      <ul class="deliver-list">
+        <li>Executive overview — total AI tools in use, sovereignty split, adoption curve</li>
+        <li>Per-tool detail — sovereignty tier, operator, where data is processed, paperwork status</li>
+        <li>Sovereignty assessment report — ready for DPO sign-off and auditor review</li>
+        <li>Shadow API detection — quiet developer and integration side-channels surfaced</li>
+        <li>Weekly DPO digest — what changed, what's new, what needs your attention</li>
+        <li>High-risk alerts — when a new tool with foreign-jurisdiction exposure appears</li>
+        <li>European alternatives — concrete migration suggestions for anything high-risk</li>
+      </ul>
+    </div>
+    <div class="report-mock">
+      <div class="report-mock__bar">
+        <div class="dot r"></div>
+        <div class="dot y"></div>
+        <div class="dot g"></div>
+        <div class="report-mock__title">Sovereignty Assessment — Sample</div>
+      </div>
+      <div class="report-mock__body">
+
+        <div class="mock-kpi">
+          <div class="mock-kpi__cell eu">
+            <div class="mock-kpi__count">12</div>
+            <div class="mock-kpi__label">Sovereign</div>
+          </div>
+          <div class="mock-kpi__cell aligned">
+            <div class="mock-kpi__count">18</div>
+            <div class="mock-kpi__label">Aligned</div>
+          </div>
+          <div class="mock-kpi__cell scc">
+            <div class="mock-kpi__count">9</div>
+            <div class="mock-kpi__label">Safeguards</div>
+          </div>
+          <div class="mock-kpi__cell risk">
+            <div class="mock-kpi__count">7</div>
+            <div class="mock-kpi__label">High Risk</div>
+          </div>
+        </div>
+
+        <div class="mock-finding risk">
+          <div class="mock-finding__header">
+            <span class="mock-sev risk">High Risk</span>
+            <span class="mock-finding__title">Major US chat assistant — heavy daily use, no EU residency</span>
+          </div>
+          <div class="mock-finding__meta">
+            <span class="mock-meta-item"><span>Exposure</span>Foreign jurisdiction</span>
+            <span class="mock-meta-item"><span>Action</span>EU alternative proposed</span>
+          </div>
+        </div>
+
+        <div class="mock-finding scc">
+          <div class="mock-finding__header">
+            <span class="mock-sev scc">Safeguards</span>
+            <span class="mock-finding__title">Enterprise AI assistant — third-country operator, contract review needed</span>
+          </div>
+          <div class="mock-finding__meta">
+            <span class="mock-meta-item"><span>Status</span>Legal sign-off pending</span>
+            <span class="mock-meta-item"><span>Action</span>Review triggered</span>
+          </div>
+        </div>
+
+        <div class="mock-finding eu">
+          <div class="mock-finding__header">
+            <span class="mock-sev eu">Sovereign</span>
+            <span class="mock-finding__title">European translation service — fully compliant</span>
+          </div>
+          <div class="mock-finding__meta">
+            <span class="mock-meta-item"><span>Operator</span>EU</span>
+            <span class="mock-meta-item"><span>Status</span>DPO-approved</span>
+          </div>
+        </div>
+
+        <div class="mock-finding aligned">
+          <div class="mock-finding__header">
+            <span class="mock-sev aligned">New · Unclassified</span>
+            <span class="mock-finding__title">Newly detected AI tool — first seen this week</span>
+          </div>
+          <div class="mock-finding__meta">
+            <span class="mock-meta-item"><span>Status</span>Queued for review</span>
+            <span class="mock-meta-item"><span>Claim</span>None until verified</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ———————— TRUST ———————— -->
+<section class="trust">
+  <div class="section-label">Why Us</div>
+  <h2 class="reveal" style="font-family:'Cormorant Garamond',serif;font-size:clamp(28px,3.5vw,52px);font-weight:300;line-height:1.1;max-width:680px;margin-bottom:0">A sovereignty tool that respects the very rules it helps you prove</h2>
+  <div class="trust__grid reveal">
+    <div class="trust-block">
+      <div class="trust-block__label">Principle 01</div>
+      <div class="trust-block__title">European by design</div>
+      <div class="trust-block__desc">Built and operated inside the European Union. European hosting, European data residency, European regulatory alignment — assumed from day one, not retrofitted. The tool embodies the standard it measures against.</div>
+    </div>
+    <div class="trust-block">
+      <div class="trust-block__label">Principle 02</div>
+      <div class="trust-block__title">Zero personal data</div>
+      <div class="trust-block__desc">We work with aggregated signals only. No individual users. No prompts. No personal data stored — ever. A shadow-AI tool that is itself immune to becoming a shadow-AI problem.</div>
+    </div>
+    <div class="trust-block">
+      <div class="trust-block__label">Principle 03</div>
+      <div class="trust-block__title">Evidence, not assertion</div>
+      <div class="trust-block__desc">Every classification carries its source. Every claim is traceable. "No incident found" is never dressed up as "clean record." Your DPO receives evidence they can verify — not a score to trust blindly.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ———————— CTA ———————— -->
+<section class="cta">
+  <div class="cta__glow"></div>
+  <h2 class="cta__heading reveal">
+    Know every AI tool<br>
+    <em>before</em> your DPO<br>
+    has to ask.
+  </h2>
+  <p class="cta__sub reveal">
+    Start a conversation — we'll scope the assessment together, in plain language. You bring the questions your DPO, CISO, or regulator is already asking. We bring the evidence.
+  </p>
+  <a class="cta__url reveal" href="https://aisupplychain.eu" target="_blank">
+    aisupplychain.eu
+  </a>
+</section>
+
+<!-- ———————— FOOTER ———————— -->
+<footer class="footer">
+  <div class="footer__brand">Shadow AI — EU Data Sovereignty · Security &amp; Compliance Assessment</div>
+  <div class="footer__copy">Customer Brief · 2026</div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  const svcCards = document.querySelectorAll('.svc-card');
+  svcCards.forEach((card, i) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    card.style.transition = `opacity 0.6s ${i * 0.1}s ease, transform 0.6s ${i * 0.1}s ease, background 0.35s`;
+  });
+
+  const svcObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        svcCards.forEach(card => {
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        });
+        svcObserver.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  const svcGrid = document.querySelector('.svc-grid');
+  if (svcGrid) svcObserver.observe(svcGrid);
+</script>
+</body>
+</html>
