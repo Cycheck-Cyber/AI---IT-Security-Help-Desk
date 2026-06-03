@@ -1,0 +1,1880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NIST AI RMF — Executive Briefing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:        #08080d;
+    --surface:    #0f0f17;
+    --panel:      #14141e;
+    --border:     rgba(255,255,255,0.07);
+    --gold:       #c9933a;
+    --gold-light: #e8b96a;
+    --gold-dim:   rgba(201,147,58,0.15);
+    --text:       #e8e6df;
+    --muted:      rgba(232,230,223,0.45);
+    --accent:     #3a6fc9;
+    --danger:     #c93a3a;
+    --success:    #3ac97a;
+
+    /* NIST Function colours (mirrors the live app) */
+    --govern:  #a78bfa;
+    --map:     #38bdf8;
+    --measure: #fb923c;
+    --manage:  #34d399;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.6;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+  }
+
+  section { position: relative; z-index: 1; }
+
+  /* ── HERO ─────────────────────────────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px clamp(24px, 8vw, 160px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero__glow {
+    position: absolute;
+    width: 700px; height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,147,58,0.07) 0%, transparent 70%);
+    top: -200px; right: -200px;
+    pointer-events: none;
+  }
+
+  .hero__glow-2 {
+    position: absolute;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(58,111,201,0.05) 0%, transparent 70%);
+    bottom: 80px; left: 5%;
+    pointer-events: none;
+  }
+
+  .hero__live {
+    position: absolute;
+    top: 48px;
+    right: clamp(24px, 8vw, 160px);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--success);
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 0.6s 1.2s forwards;
+  }
+
+  .hero__live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 6px var(--success);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .hero__eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.1s forwards;
+  }
+
+  .hero__eyebrow::before {
+    content: '';
+    display: block;
+    width: 32px; height: 1px;
+    background: var(--gold);
+  }
+
+  .hero__title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(48px, 8.5vw, 132px);
+    font-weight: 300;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.25s forwards;
+  }
+
+  .hero__title em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+
+  .hero__domain {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(13px, 1.5vw, 18px);
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.35s forwards;
+  }
+
+  .hero__lead {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(18px, 2.2vw, 27px);
+    font-weight: 300;
+    line-height: 1.55;
+    max-width: 740px;
+    color: rgba(232,230,223,0.8);
+    margin-bottom: 60px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.45s forwards;
+  }
+
+  .hero__stats {
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+  }
+
+  .stat { display: flex; flex-direction: column; gap: 4px; }
+
+  .stat__number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 48px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--gold-light);
+  }
+
+  .stat__label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .hero__divider {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.3;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 40px;
+    right: clamp(24px, 8vw, 160px);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    animation: fadeUp 0.8s 1s forwards;
+  }
+
+  .scroll-hint::after {
+    content: '';
+    display: block;
+    width: 1px; height: 40px;
+    background: linear-gradient(to bottom, var(--muted), transparent);
+    animation: scrollLine 2s ease-in-out infinite;
+  }
+
+  @keyframes scrollLine {
+    0%, 100% { opacity: 0.4; transform: scaleY(1); }
+    50%      { opacity: 1;   transform: scaleY(0.6); }
+  }
+
+  /* ── PROBLEM ──────────────────────────────────────────────────── */
+  .problem {
+    padding: 100px clamp(24px, 8vw, 160px);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .problem__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2px;
+    margin-top: 56px;
+  }
+
+  @media (max-width: 900px) { .problem__grid { grid-template-columns: 1fr; gap: 1px; } }
+
+  .problem-item {
+    background: var(--ink);
+    padding: 36px 32px;
+    border-left: 2px solid transparent;
+    transition: border-color 0.3s, background 0.3s;
+  }
+
+  .problem-item:hover {
+    background: #0c0c16;
+    border-left-color: var(--gold);
+  }
+
+  .problem-item__icon {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px;
+    font-weight: 300;
+    color: var(--gold-light);
+    line-height: 1;
+    margin-bottom: 20px;
+    display: block;
+    font-style: italic;
+  }
+
+  .problem-item__title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  .problem-item__desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ── OVERVIEW ─────────────────────────────────────────────────── */
+  .overview {
+    padding: 120px clamp(24px, 8vw, 160px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 48px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    max-width: 80px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.4;
+  }
+
+  .overview__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  @media (max-width: 900px) { .overview__grid { grid-template-columns: 1fr; gap: 48px; } }
+
+  .overview__heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 4vw, 56px);
+    font-weight: 300;
+    line-height: 1.1;
+    margin-bottom: 24px;
+  }
+
+  .overview__text {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 20px;
+  }
+
+  .pillars {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin-top: 8px;
+  }
+
+  .pillar {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 20px;
+    align-items: start;
+    padding: 24px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .pillar:last-child { border-bottom: 1px solid var(--border); }
+
+  .pillar__num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    padding-top: 2px;
+  }
+
+  .pillar__title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .pillar__desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── HOW IT WORKS ─────────────────────────────────────────────── */
+  .how {
+    padding: 120px clamp(24px, 8vw, 160px);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .how__heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 4vw, 56px);
+    font-weight: 300;
+    margin-bottom: 64px;
+    max-width: 560px;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px;
+  }
+
+  @media (max-width: 1000px) { .steps { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 600px)  { .steps { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 400px)  { .steps { grid-template-columns: 1fr; } }
+
+  .step {
+    background: var(--panel);
+    padding: 32px 28px;
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .step:hover { background: #1a1a26; }
+
+  .step::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .step:hover::before { opacity: 1; }
+
+  .step:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    top: 50%; right: -12px;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: rgba(201,147,58,0.3);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  @media (max-width: 1000px) { .step::after { display: none; } }
+
+  .step__n {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 64px;
+    font-weight: 300;
+    line-height: 1;
+    margin-bottom: 16px;
+    color: rgba(201,147,58,0.2);
+  }
+
+  .step__title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .step__desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  /* ── 4 NIST FUNCTIONS ─────────────────────────────────────────── */
+  .mitre-header {
+    padding: 80px clamp(24px, 8vw, 160px) 60px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+
+  .mitre-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(40px, 6vw, 88px);
+    font-weight: 300;
+    line-height: 0.95;
+  }
+
+  .mitre-heading span {
+    display: block;
+    font-style: italic;
+    color: var(--gold-light);
+  }
+
+  .mitre-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-align: right;
+    line-height: 2;
+  }
+
+  .mitre-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    background: var(--surface);
+  }
+
+  @media (max-width: 1100px) { .mitre-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px)  { .mitre-grid { grid-template-columns: 1fr; } }
+
+  .mitre-card {
+    background: var(--ink);
+    padding: 44px 32px 48px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.35s, transform 0.35s;
+  }
+
+  .mitre-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--gold-dim) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.35s;
+    pointer-events: none;
+  }
+
+  .mitre-card:hover { background: #0e0e18; transform: translateY(-2px); }
+  .mitre-card:hover::after { opacity: 1; }
+
+  .mitre-card__badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    padding: 4px 10px;
+    display: inline-block;
+    border: 1px solid;
+  }
+
+  .mitre-card[data-fn="govern"]  .mitre-card__badge { color: var(--govern);  border-color: rgba(167,139,250,0.35); }
+  .mitre-card[data-fn="map"]     .mitre-card__badge { color: var(--map);     border-color: rgba(56,189,248,0.35); }
+  .mitre-card[data-fn="measure"] .mitre-card__badge { color: var(--measure); border-color: rgba(251,146,60,0.35); }
+  .mitre-card[data-fn="manage"]  .mitre-card__badge { color: var(--manage);  border-color: rgba(52,211,153,0.35); }
+
+  .mitre-card__abbr {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 4.5vw, 60px);
+    font-weight: 300;
+    line-height: 1;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+
+  .mitre-card__name {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .mitre-card__desc {
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 28px;
+  }
+
+  .mitre-card__uses {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .mitre-use {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 12.5px;
+    color: rgba(232,230,223,0.6);
+    line-height: 1.4;
+  }
+
+  .mitre-use::before {
+    content: '→';
+    font-family: 'Space Mono', monospace;
+    color: var(--gold);
+    flex-shrink: 0;
+    font-size: 11px;
+    margin-top: 1px;
+  }
+
+  .mitre-card__bar {
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 2px; width: 0;
+    transition: width 0.5s ease;
+  }
+
+  .mitre-card[data-fn="govern"]  .mitre-card__bar { background: linear-gradient(90deg, var(--govern),  transparent); }
+  .mitre-card[data-fn="map"]     .mitre-card__bar { background: linear-gradient(90deg, var(--map),     transparent); }
+  .mitre-card[data-fn="measure"] .mitre-card__bar { background: linear-gradient(90deg, var(--measure), transparent); }
+  .mitre-card[data-fn="manage"]  .mitre-card__bar { background: linear-gradient(90deg, var(--manage),  transparent); }
+
+  .mitre-card:hover .mitre-card__bar { width: 100%; }
+
+  /* ── CONTROL DOMAINS (formerly sources) ───────────────────────── */
+  .sources-header {
+    padding: 80px clamp(24px, 8vw, 160px) 60px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+
+  .sources-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(40px, 6vw, 88px);
+    font-weight: 300;
+    line-height: 0.95;
+  }
+
+  .sources-heading span { display: block; font-style: italic; color: var(--gold-light); }
+
+  .sources-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-align: right;
+    line-height: 2;
+  }
+
+  .sources-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  @media (max-width: 1100px) { .sources-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 750px)  { .sources-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px)  { .sources-grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--ink);
+    padding: 32px 28px 36px;
+    position: relative;
+    cursor: default;
+    transition: background 0.35s, transform 0.35s;
+    overflow: hidden;
+  }
+
+  .card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--gold-dim) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.35s;
+    pointer-events: none;
+  }
+
+  .card:hover { background: #0e0e18; transform: translateY(-2px); }
+  .card:hover::after { opacity: 1; }
+
+  .card__index {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    margin-bottom: 20px;
+    opacity: 0.7;
+  }
+
+  .card__icon {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 400;
+    line-height: 1;
+    margin-bottom: 16px;
+    display: block;
+    color: var(--gold-light);
+    font-style: italic;
+    letter-spacing: -0.02em;
+  }
+
+  .card__title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+
+  .card__desc {
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.65;
+    margin-bottom: 20px;
+  }
+
+  .card__tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border: 1px solid;
+    border-radius: 2px;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
+  .card[data-fn="govern"]  .tag { border-color: rgba(167,139,250,0.3); color: var(--govern); }
+  .card[data-fn="map"]     .tag { border-color: rgba(56,189,248,0.3);  color: var(--map); }
+  .card[data-fn="measure"] .tag { border-color: rgba(251,146,60,0.3);  color: var(--measure); }
+  .card[data-fn="manage"]  .tag { border-color: rgba(52,211,153,0.3);  color: var(--manage); }
+
+  .card__bar {
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 2px; width: 0;
+    transition: width 0.5s ease;
+  }
+
+  .card[data-fn="govern"]  .card__bar { background: linear-gradient(90deg, var(--govern),  transparent); }
+  .card[data-fn="map"]     .card__bar { background: linear-gradient(90deg, var(--map),     transparent); }
+  .card[data-fn="measure"] .card__bar { background: linear-gradient(90deg, var(--measure), transparent); }
+  .card[data-fn="manage"]  .card__bar { background: linear-gradient(90deg, var(--manage),  transparent); }
+
+  .card:hover .card__bar { width: 100%; }
+
+  /* ── RISK LEVELS ──────────────────────────────────────────────── */
+  .risk {
+    padding: 120px clamp(24px, 8vw, 160px);
+  }
+
+  .risk__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-top: 56px;
+  }
+
+  @media (max-width: 900px) { .risk__grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 500px) { .risk__grid { grid-template-columns: 1fr; } }
+
+  .risk-level {
+    background: var(--panel);
+    padding: 32px 24px;
+    text-align: center;
+    border-top: 3px solid transparent;
+    transition: transform 0.3s;
+  }
+
+  .risk-level:hover { transform: translateY(-4px); }
+
+  .risk-level.critical { border-color: #ff4444; }
+  .risk-level.high     { border-color: #ff8800; }
+  .risk-level.medium   { border-color: #ffcc00; }
+  .risk-level.low      { border-color: #44cc77; }
+
+  .risk-level__range {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+
+  .risk-level__dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin: 0 auto 12px;
+  }
+
+  .critical .risk-level__dot { background: #ff4444; box-shadow: 0 0 8px #ff4444; }
+  .high     .risk-level__dot { background: #ff8800; box-shadow: 0 0 8px #ff8800; }
+  .medium   .risk-level__dot { background: #ffcc00; box-shadow: 0 0 8px #ffcc00; }
+  .low      .risk-level__dot { background: #44cc77; box-shadow: 0 0 8px #44cc77; }
+
+  .risk-level__name {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .risk-level__def {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  /* ── DELIVERABLE / MOCK DASHBOARD ─────────────────────────────── */
+  .deliverable {
+    padding: 120px clamp(24px, 8vw, 160px);
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .deliverable__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  @media (max-width: 900px) { .deliverable__grid { grid-template-columns: 1fr; } }
+
+  .deliverable__heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(28px, 3.5vw, 48px);
+    font-weight: 300;
+    line-height: 1.15;
+    margin-bottom: 24px;
+  }
+
+  .deliverable__text {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 32px;
+  }
+
+  .deliver-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+
+  .deliver-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+
+  .deliver-list li::before {
+    content: '→';
+    color: var(--gold);
+    font-family: 'Space Mono', monospace;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Dashboard mock */
+  .report-mock {
+    background: var(--ink);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    font-family: 'Space Mono', monospace;
+    font-size: 11.5px;
+  }
+
+  .report-mock__bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; }
+  .dot.y { background: #ffbd2e; }
+  .dot.g { background: #28c940; }
+
+  .report-mock__title {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+  }
+
+  .report-mock__body { padding: 20px 20px 24px; }
+
+  /* KPI strip */
+  .mock-kpi {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .mock-kpi__cell {
+    border: 1px solid;
+    padding: 10px 8px;
+    text-align: center;
+  }
+
+  .mock-kpi__cell.crit   { border-color: rgba(255,68,68,0.3);  background: rgba(255,68,68,0.06); }
+  .mock-kpi__cell.high   { border-color: rgba(255,136,0,0.3);  background: rgba(255,136,0,0.06); }
+  .mock-kpi__cell.med    { border-color: rgba(255,204,0,0.3);  background: rgba(255,204,0,0.06); }
+  .mock-kpi__cell.low    { border-color: rgba(68,204,119,0.3); background: rgba(68,204,119,0.06); }
+
+  .mock-kpi__count {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .mock-kpi__cell.crit .mock-kpi__count { color: #ff6b6b; }
+  .mock-kpi__cell.high .mock-kpi__count { color: #ff9944; }
+  .mock-kpi__cell.med  .mock-kpi__count { color: #ffe066; }
+  .mock-kpi__cell.low  .mock-kpi__count { color: #66cc88; }
+
+  .mock-kpi__label {
+    font-size: 8.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Risk row */
+  .mock-risk {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .mock-risk:last-child { border-bottom: none; }
+
+  .mock-risk__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .mock-sev {
+    padding: 2px 10px;
+    border-radius: 2px;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .mock-sev.crit   { background: rgba(255,68,68,0.15);  color: #ff6b6b; border: 1px solid rgba(255,68,68,0.3); }
+  .mock-sev.high   { background: rgba(255,136,0,0.12);  color: #ff9944; border: 1px solid rgba(255,136,0,0.3); }
+  .mock-sev.medium { background: rgba(255,204,0,0.1);   color: #ffe066; border: 1px solid rgba(255,204,0,0.25); }
+
+  .mock-risk__title {
+    font-size: 10.5px;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+
+  .mock-risk__meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .mock-meta-item {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+
+  .mock-meta-item span {
+    color: var(--gold);
+    margin-right: 4px;
+  }
+
+  .mock-risk__score {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--gold-light);
+    text-transform: uppercase;
+    margin-left: auto;
+    flex-shrink: 0;
+    font-weight: 700;
+  }
+
+  /* ── ARCHITECTURE ─────────────────────────────────────────────── */
+  .arch {
+    padding: 120px clamp(24px, 8vw, 160px);
+  }
+
+  .arch__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 56px;
+  }
+
+  @media (max-width: 800px) { .arch__grid { grid-template-columns: 1fr; } }
+
+  .arch-block {
+    background: var(--panel);
+    padding: 32px 28px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+
+  .arch-block:hover { background: #1a1a26; }
+
+  .arch-block__layer {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    opacity: 0.7;
+  }
+
+  .arch-block__title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 300;
+    margin-bottom: 12px;
+    line-height: 1.1;
+  }
+
+  .arch-block__items {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .arch-block__items li {
+    font-size: 12.5px;
+    color: var(--muted);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.4;
+  }
+
+  .arch-block__items li::before {
+    content: '·';
+    color: var(--gold);
+    flex-shrink: 0;
+    font-size: 16px;
+    line-height: 1.1;
+  }
+
+  /* ── METHODOLOGY CALLOUT ──────────────────────────────────────── */
+  .methodology {
+    padding: 120px clamp(24px, 8vw, 160px);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--ink);
+  }
+
+  .methodology__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  @media (max-width: 900px) { .methodology__grid { grid-template-columns: 1fr; gap: 48px; } }
+
+  .formula {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 32px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .formula__line {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 10px 0;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .formula__line:last-child { border-bottom: none; padding-top: 16px; margin-top: 6px; border-top: 1px solid var(--gold); }
+
+  .formula__name {
+    color: var(--muted);
+    min-width: 120px;
+  }
+
+  .formula__value {
+    color: var(--gold-light);
+    flex: 1;
+  }
+
+  .formula__range {
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+  }
+
+  .formula__final {
+    font-size: 16px;
+    color: #ff6b6b;
+    font-weight: 700;
+  }
+
+  /* ── CTA ──────────────────────────────────────────────────────── */
+  .cta {
+    padding: 120px clamp(24px, 8vw, 160px);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta__glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 70% at 50% 50%, rgba(201,147,58,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .cta__heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 5vw, 80px);
+    font-weight: 300;
+    line-height: 1.05;
+    max-width: 720px;
+    margin: 0 auto 24px;
+  }
+
+  .cta__heading em { font-style: italic; color: var(--gold-light); }
+
+  .cta__sub {
+    font-size: 14px;
+    color: var(--muted);
+    max-width: 520px;
+    margin: 0 auto 48px;
+    line-height: 1.7;
+  }
+
+  .cta__url {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(14px, 2vw, 20px);
+    letter-spacing: 0.05em;
+    color: var(--gold-light);
+    border: 1px solid rgba(201,147,58,0.3);
+    padding: 14px 36px;
+    display: inline-block;
+    text-decoration: none;
+    transition: background 0.3s, border-color 0.3s;
+  }
+
+  .cta__url:hover { background: var(--gold-dim); border-color: var(--gold); }
+
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 32px clamp(24px, 8vw, 160px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .footer__brand {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .footer__copy {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: rgba(232,230,223,0.2);
+  }
+
+  /* ── ANIMATIONS ───────────────────────────────────────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @media print {
+    body::before, body::after { display: none; }
+    .card:hover, .step:hover, .risk-level:hover { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ──────── HERO ──────── -->
+<section class="hero">
+  <div class="hero__glow"></div>
+  <div class="hero__glow-2"></div>
+
+  <div class="hero__live">
+    <div class="hero__live-dot"></div>
+    System Operational
+  </div>
+
+  <p class="hero__eyebrow">Executive Briefing — Governance</p>
+
+  <h1 class="hero__title">
+    AI Risk<br>
+    Management<br>
+    <em>Framework</em>
+  </h1>
+
+  <p class="hero__domain">nist-rmf.aconnic-ai.com</p>
+
+  <p class="hero__lead">
+    A chat-driven assessment platform that walks governance teams through all 294 NIST AI RMF controls — scoring every response across four risk dimensions and producing a defensible residual-risk matrix in a single session.
+  </p>
+
+  <div class="hero__stats">
+    <div class="stat">
+      <span class="stat__number">294</span>
+      <span class="stat__label">NIST Controls</span>
+    </div>
+    <div class="stat">
+      <span class="stat__number">4</span>
+      <span class="stat__label">Core Functions</span>
+    </div>
+    <div class="stat">
+      <span class="stat__number">4</span>
+      <span class="stat__label">Scoring Dimensions</span>
+    </div>
+    <div class="stat">
+      <span class="stat__number">&lt;45<span style="font-size:26px">min</span></span>
+      <span class="stat__label">Full Assessment</span>
+    </div>
+  </div>
+
+  <div class="hero__divider"></div>
+  <div class="scroll-hint">Scroll</div>
+</section>
+
+<!-- ──────── PROBLEM ──────── -->
+<section class="problem">
+  <div class="section-label">The Problem</div>
+  <div class="problem__grid reveal">
+    <div class="problem-item">
+      <span class="problem-item__icon">I</span>
+      <div class="problem-item__title">Risk Without Measurement</div>
+      <div class="problem-item__desc">AI systems are being deployed faster than they can be governed. Boards ask "how risky is our AI?" and receive narrative answers — not numbers. Without a consistent scoring model, risk exposure cannot be compared, tracked, or defended to regulators.</div>
+    </div>
+    <div class="problem-item">
+      <span class="problem-item__icon">II</span>
+      <div class="problem-item__title">Compliance Without Visibility</div>
+      <div class="problem-item__desc">Spreadsheet-based NIST AI RMF reviews die within weeks of launch. Data is stale, ownership is unclear, and residual risk is invisible to the leadership team. Governance becomes a one-off audit exercise rather than a living programme.</div>
+    </div>
+    <div class="problem-item">
+      <span class="problem-item__icon">III</span>
+      <div class="problem-item__title">Governance Without Evidence</div>
+      <div class="problem-item__desc">When an incident occurs, organisations need to show they measured, mitigated, and monitored AI risk. A structured, timestamped, auditable assessment trail is the difference between a defensible record and a reputational crisis.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────── OVERVIEW ──────── -->
+<section class="overview">
+  <div class="section-label">Platform Overview</div>
+  <div class="overview__grid reveal">
+    <div>
+      <h2 class="overview__heading">AI risk, quantified and defensible</h2>
+      <p class="overview__text">
+        The NIST AI RMF Assessment platform converts the full 294-control framework into a guided conversation. Risk officers, compliance leads, and AI product owners work through each function — GOVERN, MAP, MEASURE, MANAGE — answering plain-language questions instead of parsing spreadsheets.
+      </p>
+      <p class="overview__text">
+        Behind the interface, an Azure OpenAI scoring engine evaluates every answer across four dimensions: Impact, Likelihood, Control Weakness, and Detectability. The result is a residual risk score for every finding — aggregated into a live matrix, a KPI strip, and a defensible audit record.
+      </p>
+    </div>
+    <div class="pillars">
+      <div class="pillar">
+        <span class="pillar__num">01</span>
+        <div>
+          <div class="pillar__title">Chat-Driven Interview</div>
+          <div class="pillar__desc">The full NIST AI RMF becomes a conversation. No spreadsheets, no training required. Respondents answer plain questions; the platform tracks progress across all four functions automatically.</div>
+        </div>
+      </div>
+      <div class="pillar">
+        <span class="pillar__num">02</span>
+        <div>
+          <div class="pillar__title">Four-Dimensional AI Scoring</div>
+          <div class="pillar__desc">Every answer is scored by an Azure OpenAI model across Impact, Likelihood, Control Weakness, and Detectability — producing a residual risk score on a transparent 0–27 scale.</div>
+        </div>
+      </div>
+      <div class="pillar">
+        <span class="pillar__num">03</span>
+        <div>
+          <div class="pillar__title">Live Risk Matrix & KPIs</div>
+          <div class="pillar__desc">Findings appear in a 4×4 impact/likelihood matrix in real time. Critical, High, Medium, and Low counts update as the assessment progresses — visible to the governance team throughout.</div>
+        </div>
+      </div>
+      <div class="pillar">
+        <span class="pillar__num">04</span>
+        <div>
+          <div class="pillar__title">Transparent Methodology</div>
+          <div class="pillar__desc">Every score is reproducible. The residual formula, thresholds, and worked examples are published in-app — no opaque AI verdicts, no black boxes. Audit-ready by design.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────── HOW IT WORKS ──────── -->
+<section class="how">
+  <div class="section-label">How It Works</div>
+  <h2 class="how__heading reveal">From first question to<br>defensible risk matrix<br>in five steps</h2>
+  <div class="steps reveal">
+    <div class="step">
+      <div class="step__n">01</div>
+      <div class="step__title">Secure Login</div>
+      <div class="step__desc">Assessors sign in through a single-sign-on portal protected by one-time-password verification. Every session is private to the organisation, with all conversation data transmitted over an encrypted, authenticated channel.</div>
+    </div>
+    <div class="step">
+      <div class="step__n">02</div>
+      <div class="step__title">Structured Interview</div>
+      <div class="step__desc">The platform guides the respondent through GOVERN → MAP → MEASURE → MANAGE. Each of the 294 controls is surfaced as a single plain-language question in a chat interface.</div>
+    </div>
+    <div class="step">
+      <div class="step__n">03</div>
+      <div class="step__title">AI Dimensional Scoring</div>
+      <div class="step__desc">Azure OpenAI evaluates each answer on four dimensions — Impact, Likelihood, Control Weakness, Detectability — with scores from 0 to 3. Reasoning is captured alongside the scores.</div>
+    </div>
+    <div class="step">
+      <div class="step__n">04</div>
+      <div class="step__title">Risk Aggregation</div>
+      <div class="step__desc">A residual risk score is calculated per finding via a published formula. Findings are placed on a 4×4 impact/likelihood matrix and classified as Critical, High, Medium, or Low.</div>
+    </div>
+    <div class="step">
+      <div class="step__n">05</div>
+      <div class="step__title">Governance Report</div>
+      <div class="step__desc">On completion, the platform renders a full risk matrix view — KPI strip, top risks, full distribution — persisted in PostgreSQL and available to the governance committee on demand.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────── 4 NIST FUNCTIONS ──────── -->
+<div class="mitre-header reveal" style="position:relative;z-index:1;">
+  <h2 class="mitre-heading">
+    4 NIST<br>
+    <span>Functions</span>
+  </h2>
+  <div class="mitre-meta">
+    NIST AI RMF 1.0<br>
+    Published January 2023
+  </div>
+</div>
+
+<div class="mitre-grid" style="position:relative;z-index:1;">
+
+  <div class="mitre-card" data-fn="govern">
+    <div class="mitre-card__badge">Function 01</div>
+    <div class="mitre-card__abbr">GOVERN</div>
+    <div class="mitre-card__name">Culture, Policy & Accountability</div>
+    <div class="mitre-card__desc">Establish the governance, policies, and accountability structures that make AI risk management sustainable. This is where strategy, ownership, and risk tolerance are defined for the organisation.</div>
+    <div class="mitre-card__uses">
+      <div class="mitre-use">Board-level AI policy and risk appetite</div>
+      <div class="mitre-use">Roles, responsibilities, and escalation paths</div>
+      <div class="mitre-use">Diverse perspectives and stakeholder input</div>
+      <div class="mitre-use">Third-party and supply-chain governance</div>
+    </div>
+    <div class="mitre-card__bar"></div>
+  </div>
+
+  <div class="mitre-card" data-fn="map">
+    <div class="mitre-card__badge">Function 02</div>
+    <div class="mitre-card__abbr">MAP</div>
+    <div class="mitre-card__name">Context & Categorization</div>
+    <div class="mitre-card__desc">Understand the context in which AI is deployed: who it affects, what it is designed to do, what harms it could cause, and how it connects to the rest of the organisation. No risk can be managed until it is mapped.</div>
+    <div class="mitre-card__uses">
+      <div class="mitre-use">AI system categorisation and inventory</div>
+      <div class="mitre-use">Intended use and potential misuse identification</div>
+      <div class="mitre-use">Impact assessment on affected communities</div>
+      <div class="mitre-use">Risk-benefit analysis per deployment</div>
+    </div>
+    <div class="mitre-card__bar"></div>
+  </div>
+
+  <div class="mitre-card" data-fn="measure">
+    <div class="mitre-card__badge">Function 03</div>
+    <div class="mitre-card__abbr">MEASURE</div>
+    <div class="mitre-card__name">Testing, Evaluation & Monitoring</div>
+    <div class="mitre-card__desc">Quantify AI risk with evidence. Testing for validity, reliability, safety, fairness, and explainability — not once at launch, but continuously across the system lifecycle with documented metrics and methodology.</div>
+    <div class="mitre-card__uses">
+      <div class="mitre-use">Performance validity and reliability testing</div>
+      <div class="mitre-use">Fairness, bias, and safety evaluation</div>
+      <div class="mitre-use">Transparency and explainability controls</div>
+      <div class="mitre-use">Continuous monitoring in production</div>
+    </div>
+    <div class="mitre-card__bar"></div>
+  </div>
+
+  <div class="mitre-card" data-fn="manage">
+    <div class="mitre-card__badge">Function 04</div>
+    <div class="mitre-card__abbr">MANAGE</div>
+    <div class="mitre-card__name">Response, Recovery & Improvement</div>
+    <div class="mitre-card__desc">Prioritise risks, respond to incidents, and feed learnings back into governance. Risk management is a loop, not a checklist — MANAGE closes it with prioritisation, response plans, and continuous improvement.</div>
+    <div class="mitre-card__uses">
+      <div class="mitre-use">Risk prioritisation and treatment planning</div>
+      <div class="mitre-use">Incident detection, response, and recovery</div>
+      <div class="mitre-use">Third-party risk monitoring in operation</div>
+      <div class="mitre-use">Post-incident review and framework improvement</div>
+    </div>
+    <div class="mitre-card__bar"></div>
+  </div>
+
+</div>
+
+<!-- ──────── CONTROL DOMAINS ──────── -->
+<div class="sources-header reveal" style="position:relative;z-index:1;">
+  <h2 class="sources-heading">
+    Every Control<br>
+    <span>Every Category</span>
+  </h2>
+  <div class="sources-meta">
+    294 controls · 4 functions · 20 categories<br>
+    All scored in a single session
+  </div>
+</div>
+
+<div class="sources-grid" style="position:relative;z-index:1;">
+
+  <div class="card" data-fn="govern">
+    <div class="card__index">GV.1</div>
+    <span class="card__icon">Policy</span>
+    <div class="card__title">Governance & Strategy</div>
+    <div class="card__desc">Board-approved AI policy, documented risk appetite, and strategic alignment between AI adoption and enterprise risk posture. The baseline every downstream control rests on.</div>
+    <div class="card__tags"><span class="tag">Govern</span><span class="tag">Policy</span><span class="tag">Board</span></div>
+    <div class="card__bar"></div>
+  </div>
+
+  <div class="card" data-fn="govern">
+    <div class="card__index">GV.2</div>
+    <span class="card__icon">Roles</span>
+    <div class="card__title">Accountability & Oversight</div>
+    <div class="card__desc">Clear ownership of AI systems and their risks — named accountable executives, escalation paths, and oversight committees that actively review AI deployments.</div>
+    <div class="card__tags"><span class="tag">Govern</span><span class="tag">Ownership</span><span class="tag">Oversight</span></div>
+    <div class="card__bar"></div>
+  </div>
+
+  <div class="card" data-fn="govern">
+    <div class="card__index">GV.3</div>
+    <span class="card__icon">Culture</span>
+    <div class="card__title">Risk Culture & Tolerance</div>
+    <div class="card__desc">A documented, organisation-wide AI risk tolerance, with cultural reinforcement through training, communication, and incentives aligned to responsible AI outcomes.</div>
+    <div class="card__tags"><span class="tag">Govern</span><span class="tag">Culture</span><span class="tag">Tolerance</span></div>
+    <div class="card__bar"></div>
+  </div>
+
+  <div class="card" data-fn="govern">
+    <div class="card__index">GV.4</div>
+    <span class="card__icon">Diversity</span>
+    <div class="card__title">Diverse Perspectives</div>
+    <div class="card__desc">Structured processes for incorporating diverse expertise, affected communities, and external review into AI risk decisions — not a box-tick, a measured input.</div>
+    <div class="card__tags"><span class="tag">Govern</span><span class="tag">Stakeholders</span><span class="tag">Review</span></div>
+    <div class="card__bar"></div>
+  </div>
+
+  <div class="card" data-fn="map">
+    <div class="card__index">MP.1</div>
+    <span class="card__icon">Context</span>
+    <div class="card__title">AI System Context</div>
+    <div class="card__desc">Documented purpose, intended users, operating environment, and downstream consumers of each AI system — with clear boundaries between human oversight and autonomous operation.</div>
+    <div class="card__tags"><span class="tag">Map</span><span class="tag">Purpose</span><span class="tag">Scope</span></div>
+    <div class="card__bar"></div>
+  </div>
+
+  <div class="card" data-fn="map">
+    <div class="card__index">MP.2</div>
+    <span class="card__icon">Inventory</span>
+    <div class="card__title">System Categorization</div>
+    <div class="card__desc">A maintained inventory of AI systems, categorised by risk tier — covering model type, data sensitivity, deployment surface, and regulatory scope.</div>
+    <div class="card__tags"><span class="tag">Map</span><span class="tag">Inventory</span><span class="tag">Tiering</span></div>
+    <div class="card__bar"></div>
+  </div>
+
+  <div class="card" data-fn="map">
+    <div class="card__index">MP.3</div>
+    <span class="card__icon">Impact</span>
+    <div class="card__title">Impact & Harm Analysis</div>
+    <div class="card__desc">Per-system assessment of potential harms — to individuals, groups, and society — weighted against expected benefits. The foundation for prioritisation in the MANAGE function.</div>
+    <div class="card__tags"><span class="tag">Map</span><span class="tag">Impact</span><span class="tag">Benefit</span></div>
+    <div class="card__bar"></div>
+  </div>
+
+  <div class="card" data-fn="map">
+    <div class="card__index">MP.4</div>
+    <span class="card__icon">Lineage</span>
+    <div class="card__title">Third-Party & Data Lineage</div>
+    <div class="card__desc">Traceability of upstream models, training data, foundation providers, and third-party components — with risk attribution to each external dependency.</div>
+    <div class="card__tags"><span class="tag">Map</span><span class="tag">Lineage</span><span class="tag">Supply Chain</span></div>
+    <div class="card__bar"></div>
+  </div>
+
+  <div class="card" data-fn="measure">
+    <div class="card__index">MS.1</div>
+    <span class="card__icon">Metrics</span>
+    <div class="card__title">Validity & Reliability</div>
+    <div class="card__desc">Documented testing methodology, performance thresholds, and reliability monitoring — with clear definitions of what "working correctly" means per system and per use case.</div>
+    <div class="card__tags"><span class="tag">Measure</span><span class="tag">Testing</span><span class="tag">Performance</span></div>
+    <div class="card__bar"></div>
+  </div>
+
+  <div class="card" data-fn="measure">
+    <div class="card__index">MS.2</div>
+    <span class="card__icon">Fairness</span>
+    <div class="card__title">Fairness, Bias & Safety</div>
+    <div class="card__desc">Evaluation of algorithmic fairness, bias across protected attributes, and safety controls — using defined metrics, not subjective review. Evidence captured for audit.</div>
+    <div class="card__tags"><span class="tag">Measure</span><span class="tag">Bias</span><span class="tag">Safety</span></div>
+    <div class="card__bar"></div>
+  </div>
+
+  <div class="card" data-fn="measure">
+    <div class="card__index">MS.3</div>
+    <span class="card__icon">Clarity</span>
+    <div class="card__title">Transparency & Explainability</div>
+    <div class="card__desc">Mechanisms for explaining AI decisions to users, regulators, and affected parties — with model cards, documentation standards, and interpretability tooling.</div>
+    <div class="card__tags"><span class="tag">Measure</span><span class="tag">Explainability</span><span class="tag">Docs</span></div>
+    <div class="card__bar"></div>
+  </div>
+
+  <div class="card" data-fn="manage">
+    <div class="card__index">MG.1</div>
+    <span class="card__icon">Priority</span>
+    <div class="card__title">Risk Prioritization</div>
+    <div class="card__desc">A formal process for ranking, treating, and tracking AI risks — with documented tolerance thresholds and residual risk acceptance by named owners.</div>
+    <div class="card__tags"><span class="tag">Manage</span><span class="tag">Prioritise</span><span class="tag">Treatment</span></div>
+    <div class="card__bar"></div>
+  </div>
+
+  <div class="card" data-fn="manage">
+    <div class="card__index">MG.2</div>
+    <span class="card__icon">Respond</span>
+    <div class="card__title">Incident Response</div>
+    <div class="card__desc">AI-specific incident detection, response, and recovery procedures — with defined severity levels, communication plans, and post-incident review feeding back into governance.</div>
+    <div class="card__tags"><span class="tag">Manage</span><span class="tag">Incident</span><span class="tag">Recovery</span></div>
+    <div class="card__bar"></div>
+  </div>
+
+  <div class="card" data-fn="manage">
+    <div class="card__index">MG.3</div>
+    <span class="card__icon">Monitor</span>
+    <div class="card__title">Ongoing Monitoring</div>
+    <div class="card__desc">Continuous monitoring of deployed AI — drift, degradation, misuse, and emergent behaviour — with documented thresholds that trigger review, retraining, or retirement.</div>
+    <div class="card__tags"><span class="tag">Manage</span><span class="tag">Drift</span><span class="tag">Live</span></div>
+    <div class="card__bar"></div>
+  </div>
+
+  <div class="card" data-fn="manage">
+    <div class="card__index">MG.4</div>
+    <span class="card__icon">Improve</span>
+    <div class="card__title">Continuous Improvement</div>
+    <div class="card__desc">Feedback loops from incidents, audits, and stakeholder input into the governance framework itself — so the programme evolves as the AI estate and the threat landscape do.</div>
+    <div class="card__tags"><span class="tag">Manage</span><span class="tag">Feedback</span><span class="tag">Evolve</span></div>
+    <div class="card__bar"></div>
+  </div>
+
+</div>
+
+<!-- ──────── RISK LEVELS ──────── -->
+<section class="risk">
+  <div class="section-label">Risk Classification</div>
+  <h2 class="reveal" style="font-family:'Cormorant Garamond',serif;font-size:clamp(28px,3.5vw,48px);font-weight:300;max-width:540px;line-height:1.1">Every finding is placed<br>on a defensible four-tier scale</h2>
+  <div class="risk__grid reveal">
+    <div class="risk-level critical">
+      <div class="risk-level__range">Score ≥ 13</div>
+      <div class="risk-level__dot"></div>
+      <div class="risk-level__name">Critical</div>
+      <div class="risk-level__def">Unacceptable exposure — immediate structural action required. Board visibility, mandatory remediation plan, and short-term compensating controls.</div>
+    </div>
+    <div class="risk-level high">
+      <div class="risk-level__range">Score 8 – 12</div>
+      <div class="risk-level__dot"></div>
+      <div class="risk-level__name">High</div>
+      <div class="risk-level__def">Priority remediation required. Documented treatment plan, named owner, and tracked progress through the next two governance cycles.</div>
+    </div>
+    <div class="risk-level medium">
+      <div class="risk-level__range">Score 4 – 7</div>
+      <div class="risk-level__dot"></div>
+      <div class="risk-level__name">Medium</div>
+      <div class="risk-level__def">Address in the standard governance cycle. Included in the next quarterly review with documented action, owner, and expected completion date.</div>
+    </div>
+    <div class="risk-level low">
+      <div class="risk-level__range">Score 0 – 3</div>
+      <div class="risk-level__dot"></div>
+      <div class="risk-level__name">Low</div>
+      <div class="risk-level__def">Acceptable with monitoring. Tracked in the risk register and re-evaluated on the next full assessment — no immediate action required.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────── METHODOLOGY ──────── -->
+<section class="methodology">
+  <div class="section-label">The Formula</div>
+  <div class="methodology__grid reveal">
+    <div>
+      <h2 class="deliverable__heading">A transparent scoring model — not a black box</h2>
+      <p class="deliverable__text">
+        Every residual risk score in the platform is reproducible. The formula combines the base severity of a finding with a modifier that reflects how exposed the organisation actually is — rewarding strong controls and strong detection, penalising gaps.
+      </p>
+      <p class="deliverable__text">
+        Scores, thresholds, and worked examples are published in the app itself at <span style="color:var(--gold-light)">/methodology</span> — available to assessors, auditors, and regulators on demand.
+      </p>
+    </div>
+    <div class="formula">
+      <div class="formula__line">
+        <span class="formula__name">base</span>
+        <span class="formula__value">= Impact × Likelihood</span>
+        <span class="formula__range">(0 – 9)</span>
+      </div>
+      <div class="formula__line">
+        <span class="formula__name">modifier</span>
+        <span class="formula__value">= 1 + (CW ÷ 3) + (D ÷ 3)</span>
+        <span class="formula__range">(1.0 – 3.0)</span>
+      </div>
+      <div class="formula__line">
+        <span class="formula__name">residual</span>
+        <span class="formula__value formula__final">= round(base × modifier)</span>
+        <span class="formula__range">(0 – 27)</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────── DELIVERABLE / MOCK ──────── -->
+<section class="deliverable">
+  <div class="deliverable__grid reveal">
+    <div>
+      <div class="section-label">What Governance Receives</div>
+      <h2 class="deliverable__heading">A board-ready risk matrix — not a raw audit log</h2>
+      <p class="deliverable__text">
+        On completion of the assessment, the platform renders a single governance-ready view: a full 4×4 risk matrix, a live KPI strip, a ranked top-risks table, and a per-function breakdown. All persisted, all auditable, all defensible.
+      </p>
+      <ul class="deliver-list">
+        <li>Live KPI strip — Critical / High / Medium / Low counts</li>
+        <li>4×4 impact-by-likelihood matrix with findings in each cell</li>
+        <li>Top risks table, ranked by residual score</li>
+        <li>Per-function progress and completion breakdown</li>
+        <li>Full AI scoring reasoning for every answer</li>
+        <li>Timestamped audit trail of every interaction</li>
+        <li>Transparent residual risk formula and worked examples</li>
+      </ul>
+    </div>
+    <div class="report-mock">
+      <div class="report-mock__bar">
+        <div class="dot r"></div>
+        <div class="dot y"></div>
+        <div class="dot g"></div>
+        <div class="report-mock__title">NIST AI RMF — RISK MATRIX</div>
+      </div>
+      <div class="report-mock__body">
+
+        <div class="mock-kpi">
+          <div class="mock-kpi__cell crit">
+            <div class="mock-kpi__count">4</div>
+            <div class="mock-kpi__label">Critical</div>
+          </div>
+          <div class="mock-kpi__cell high">
+            <div class="mock-kpi__count">12</div>
+            <div class="mock-kpi__label">High</div>
+          </div>
+          <div class="mock-kpi__cell med">
+            <div class="mock-kpi__count">28</div>
+            <div class="mock-kpi__label">Medium</div>
+          </div>
+          <div class="mock-kpi__cell low">
+            <div class="mock-kpi__count">41</div>
+            <div class="mock-kpi__label">Low</div>
+          </div>
+        </div>
+
+        <div class="mock-risk">
+          <div class="mock-risk__header">
+            <span class="mock-sev crit">Critical</span>
+            <span class="mock-risk__title">No documented AI risk appetite approved by board</span>
+            <span class="mock-risk__score">18 / 27</span>
+          </div>
+          <div class="mock-risk__meta">
+            <span class="mock-meta-item"><span>Control</span>GV.1 · Q1</span>
+            <span class="mock-meta-item"><span>I·L·CW·D</span>2 · 3 · 3 · 3</span>
+          </div>
+        </div>
+
+        <div class="mock-risk">
+          <div class="mock-risk__header">
+            <span class="mock-sev high">High</span>
+            <span class="mock-risk__title">Bias testing absent on hiring model in production</span>
+            <span class="mock-risk__score">12 / 27</span>
+          </div>
+          <div class="mock-risk__meta">
+            <span class="mock-meta-item"><span>Control</span>MS.2 · Q3</span>
+            <span class="mock-meta-item"><span>I·L·CW·D</span>3 · 2 · 2 · 1</span>
+          </div>
+        </div>
+
+        <div class="mock-risk">
+          <div class="mock-risk__header">
+            <span class="mock-sev high">High</span>
+            <span class="mock-risk__title">No named incident response owner for AI systems</span>
+            <span class="mock-risk__score">10 / 27</span>
+          </div>
+          <div class="mock-risk__meta">
+            <span class="mock-meta-item"><span>Control</span>MG.2 · Q2</span>
+            <span class="mock-meta-item"><span>I·L·CW·D</span>2 · 2 · 3 · 1</span>
+          </div>
+        </div>
+
+        <div class="mock-risk">
+          <div class="mock-risk__header">
+            <span class="mock-sev medium">Medium</span>
+            <span class="mock-risk__title">AI system inventory incomplete — shadow deployments</span>
+            <span class="mock-risk__score">6 / 27</span>
+          </div>
+          <div class="mock-risk__meta">
+            <span class="mock-meta-item"><span>Control</span>MP.2 · Q1</span>
+            <span class="mock-meta-item"><span>I·L·CW·D</span>2 · 2 · 1 · 1</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────── ARCHITECTURE ──────── -->
+<section class="arch">
+  <div class="section-label">Technical Architecture</div>
+  <h2 class="reveal" style="font-family:'Cormorant Garamond',serif;font-size:clamp(28px,3.5vw,52px);font-weight:300;line-height:1.1;max-width:600px;margin-bottom:0">Three layers working together<br>to deliver audit-ready governance</h2>
+  <div class="arch__grid reveal">
+    <div class="arch-block">
+      <div class="arch-block__layer">Layer 01 — Orchestration</div>
+      <div class="arch-block__title">Assessment Engine</div>
+      <ul class="arch-block__items">
+        <li>Unified, authenticated channel for all chat interactions</li>
+        <li>Session state, phase routing, and progress tracking</li>
+        <li>Structured workflow covering all 294 controls</li>
+        <li>Question-by-question flow control with resume support</li>
+        <li>Persisted conversation history for audit</li>
+      </ul>
+    </div>
+    <div class="arch-block">
+      <div class="arch-block__layer">Layer 02 — Intelligence</div>
+      <div class="arch-block__title">Azure OpenAI Scoring</div>
+      <ul class="arch-block__items">
+        <li>GPT-4.1 scoring across Impact, Likelihood, CW, Detectability</li>
+        <li>Reasoning captured alongside every numeric score</li>
+        <li>Residual risk formula applied consistently per finding</li>
+        <li>Results written to PostgreSQL with timestamps</li>
+        <li>Deterministic aggregation into matrix and KPIs</li>
+      </ul>
+    </div>
+    <div class="arch-block">
+      <div class="arch-block__layer">Layer 03 — Presentation</div>
+      <div class="arch-block__title">Next.js Dashboard</div>
+      <ul class="arch-block__items">
+        <li>Next.js 14 App Router, TypeScript, Tailwind CSS</li>
+        <li>Chat interface · progress sidebar · risk matrix modal</li>
+        <li>Live radar and neural-network canvas animations</li>
+        <li>Methodology page with formula and worked examples</li>
+        <li>Hosted at nist-rmf.aconnic-ai.com</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ──────── CTA ──────── -->
+<section class="cta">
+  <div class="cta__glow"></div>
+  <h2 class="cta__heading reveal">
+    AI risk that is<br>
+    measured.<br>
+    <em>Not assumed.</em>
+  </h2>
+  <p class="cta__sub reveal">
+    The NIST AI RMF Assessment platform turns the full 294-control framework into a single defensible session — with a risk matrix that governance teams, auditors, and boards can all read from the same page.
+  </p>
+  <a class="cta__url reveal" href="https://nist-rmf.aconnic-ai.com" target="_blank">
+    nist-rmf.aconnic-ai.com
+  </a>
+</section>
+
+<!-- ──────── FOOTER ──────── -->
+<footer class="footer">
+  <div class="footer__brand">NIST AI RMF — Governance Assessment Platform</div>
+  <div class="footer__copy">Confidential — Executive Briefing — 2026</div>
+</footer>
+
+<script>
+  // Reveal on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Stagger control-domain cards
+  const cards = document.querySelectorAll('.sources-grid .card');
+  cards.forEach((card, i) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    card.style.transition = `opacity 0.5s ${i * 0.045}s ease, transform 0.5s ${i * 0.045}s ease, background 0.35s`;
+  });
+
+  const gridObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        cards.forEach(card => {
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        });
+        gridObserver.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.05 });
+
+  const grid = document.querySelector('.sources-grid');
+  if (grid) gridObserver.observe(grid);
+
+  // Stagger NIST function cards
+  const mitreCards = document.querySelectorAll('.mitre-card');
+  mitreCards.forEach((card, i) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    card.style.transition = `opacity 0.6s ${i * 0.1}s ease, transform 0.6s ${i * 0.1}s ease, background 0.35s`;
+  });
+
+  const mitreObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        mitreCards.forEach(card => {
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        });
+        mitreObserver.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  const mitreGrid = document.querySelector('.mitre-grid');
+  if (mitreGrid) mitreObserver.observe(mitreGrid);
+</script>
+</body>
+</html>
